@@ -1,0 +1,470 @@
+from fastapi import FastAPI, Request, Form
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+from datetime import datetime
+import yfinance as yf
+from sklearn.linear_model import LinearRegression
+import math
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, LSTM, Dropout
+import warnings
+import time
+import json
+warnings.filterwarnings("ignore")
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+from database import StockDatabase
+import asyncio
+from datetime import datetime, timedelta
+from pathlib import Path
+
+# Initialize database
+db = StockDatabase()
+
+# Delete existing database file if you want to start fresh (optional)
+# if os.path.exists("stock_data.db"):
+#     os.remove("stock_data.db")
+
+app = FastAPI()
+
+# Mount static files - make sure this comes BEFORE templates initialization
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+async def get_historical(quote: str) -> pd.DataFrame:
+    try:
+        end = datetime.now()
+        start = datetime(end.year-2, end.month, end.day)
+        
+        # Check if we have recent data in database
+        if not db.needs_update(quote):
+            stored_data = await db.get_stock_data(quote, start, end)
+            if stored_data is not None:
+                print(f"Using cached data for {quote}")
+                return stored_data
+
+        # If we need to fetch new data
+        print(f"Fetching new data for {quote}")
+        data = await asyncio.to_thread(
+            yf.download,
+            quote,
+            start=start,
+            end=end,
+            progress=False,
+            auto_adjust=False  # Explicitly set to False to get both adjusted and unadjusted prices
+        )
+        
+        if data.empty:
+            raise ValueError(f"No data found for {quote}")
+            
+        # Process the data
+        if isinstance(data.columns, pd.MultiIndex):
+            data = data.loc[:, (slice(None), quote)]
+            data.columns = data.columns.get_level_values(0)
+        
+        df = pd.DataFrame(data)
+        
+        # Ensure all required columns exist
+        required_columns = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
+        for col in required_columns:
+            if col not in df.columns:
+                if col == 'Adj Close':
+                    df['Adj Close'] = df['Close']  # Use regular close if adjusted not available
+                else:
+                    df[col] = 0  # Use 0 as default for missing columns
+        
+        # Store in database
+        db.store_stock_data(quote, df)
+        
+        return df
+        
+    except Exception as e:
+        print(f"Error in get_historical: {str(e)}")  # Add debug print
+        raise ValueError(f"Error fetching data for {quote}: {str(e)}")
+
+
+
+def download_with_retry(quote, **kwargs):
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            data = yf.download(quote, **kwargs)
+            if not data.empty:
+                return data
+        except Exception as e:
+            if attempt < max_retries - 1:
+                time.sleep(1)  # Wait a bit before retrying
+                continue
+            else:
+                raise e
+    return pd.DataFrame()  # Return empty DataFrame if all attempts fail
+
+
+
+def arima_model(train, test):
+    history = [x[0] for x in train]  # Extract values from numpy array
+    predictions = []
+    
+    for t in range(len(test)):
+        try:
+            model = ARIMA(history, order=(5,1,0))
+            model_fit = model.fit()
+            output = model_fit.forecast()
+            yhat = output[0]
+            predictions.append(yhat)
+            obs = test[t][0]  # Extract value from numpy array
+            history.append(obs)
+        except Exception as e:
+            print(f"Error in ARIMA prediction step {t}: {str(e)}")
+            # If prediction fails, use last known value
+            yhat = history[-1] if history else 0
+            predictions.append(yhat)
+            history.append(test[t][0])
+    
+    return predictions
+
+def ensure_stock_dir(symbol: str) -> str:
+    """Create and return the path to stock-specific directory"""
+    stock_dir = Path(f"static/{symbol}")
+    stock_dir.mkdir(parents=True, exist_ok=True)
+    return str(stock_dir)
+
+def save_visualization(symbol: str, model_type: str, fig: plt.Figure) -> str:
+    """Save visualization and return the relative path"""
+    stock_dir = ensure_stock_dir(symbol)
+    file_name = f"{model_type.lower()}.png"
+    file_path = f"{symbol}/{file_name}"
+    full_path = os.path.join("static", file_path)
+    
+    fig.savefig(full_path)
+    plt.close(fig)
+    return file_path
+
+def ARIMA_ALGO(df, symbol: str):
+    try:
+        df = df.dropna()
+        
+        # Ensure index is datetime and create a copy to avoid modifying the original
+        df = df.copy()
+        if not isinstance(df.index, pd.DatetimeIndex):
+            df.index = pd.to_datetime(df.index)
+        
+        # Create Date_Str column from index
+        df['Date_Str'] = df.index.strftime('%Y-%m-%d')
+        df['Code'] = df['Close']
+        
+        # Prepare data for ARIMA
+        data = df.copy()
+        data['Price'] = data['Close']
+        
+        # Create Quantity_date DataFrame
+        Quantity_date = pd.DataFrame(data['Price'])
+        Quantity_date = Quantity_date.fillna(method='bfill')
+        
+        # Plot trends
+        fig = plt.figure(figsize=(10, 6), dpi=100)
+        plt.plot(Quantity_date)
+        plt.title('Stock Price Trends')
+        plt.xlabel('Date')
+        plt.ylabel('Price')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        trends_path = save_visualization(symbol, "Trends", fig)
+        db.store_visualization_path(symbol, "Trends", trends_path)
+        
+        # Prepare training data
+        quantity = Quantity_date.values
+        size = int(len(quantity) * 0.80)
+        train, test = quantity[0:size], quantity[size:len(quantity)]
+        
+        predictions = arima_model(train, test)
+        
+        # Plot ARIMA predictions
+        fig = plt.figure(figsize=(10, 6), dpi=100)
+        plt.plot(test, label='Actual Price')
+        plt.plot(predictions, label='Predicted Price')
+        plt.title('ARIMA Predictions')
+        plt.xlabel('Time')
+        plt.ylabel('Price')
+        plt.legend(loc=4)
+        plt.tight_layout()
+        arima_path = save_visualization(symbol, "ARIMA", fig)
+        db.store_visualization_path(symbol, "ARIMA", arima_path)
+        
+        arima_pred = predictions[-2]
+        error_arima = math.sqrt(mean_squared_error(test, predictions))
+        
+        return arima_pred, error_arima
+    except Exception as e:
+        print(f"ARIMA Error Details: {str(e)}")  # Add detailed error logging
+        raise ValueError(f"Error in ARIMA algorithm: {str(e)}")
+
+def LSTM_ALGO(df, symbol: str):
+    try:
+        dataset_train = df.iloc[0:int(0.8*len(df)),:]
+        dataset_test = df.iloc[int(0.8*len(df)):,:]
+        
+        # Use 'Close' column for training
+        training_set = df['Close'].values.reshape(-1, 1)
+        
+        sc = MinMaxScaler(feature_range=(0,1))
+        training_set_scaled = sc.fit_transform(training_set)
+        
+        X_train = []
+        y_train = []
+        for i in range(7, len(training_set_scaled)):
+            X_train.append(training_set_scaled[i-7:i,0])
+            y_train.append(training_set_scaled[i,0])
+        
+        X_train = np.array(X_train)
+        y_train = np.array(y_train)
+        
+        # Reshape for LSTM [samples, time steps, features]
+        X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
+        
+        # Build LSTM model
+        regressor = Sequential()
+        regressor.add(LSTM(units=50, return_sequences=True, input_shape=(X_train.shape[1], 1)))
+        regressor.add(Dropout(0.2))
+        regressor.add(LSTM(units=50, return_sequences=True))
+        regressor.add(Dropout(0.2))
+        regressor.add(LSTM(units=50))
+        regressor.add(Dropout(0.2))
+        regressor.add(Dense(units=1))
+        regressor.compile(optimizer='adam', loss='mean_squared_error')
+        
+        # Train the model
+        regressor.fit(X_train, y_train, epochs=25, batch_size=32)
+        
+        # Prepare test data
+        real_stock_price = dataset_test['Close'].values.reshape(-1, 1)
+        
+        # Get the predicted stock price
+        dataset_total = pd.concat([dataset_train['Close'], dataset_test['Close']], axis=0)
+        inputs = dataset_total[len(dataset_total) - len(dataset_test) - 7:].values
+        inputs = inputs.reshape(-1, 1)
+        inputs = sc.transform(inputs)
+        
+        X_test = []
+        for i in range(7, len(inputs)):
+            X_test.append(inputs[i-7:i, 0])
+        X_test = np.array(X_test)
+        X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+        
+        predicted_stock_price = regressor.predict(X_test)
+        predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+        
+        # Prepare forecast data
+        last_seven_days = training_set_scaled[-7:]
+        X_forecast = np.array([last_seven_days[:,0]])
+        X_forecast = np.reshape(X_forecast, (X_forecast.shape[0], X_forecast.shape[1], 1))
+        
+        # Plot LSTM predictions
+        fig = plt.figure(figsize=(10, 6), dpi=100)
+        plt.plot(real_stock_price, label='Actual Price')
+        plt.plot(predicted_stock_price, label='Predicted Price')
+        plt.title('LSTM Predictions')
+        plt.xlabel('Time')
+        plt.ylabel('Price')
+        plt.legend(loc=4)
+        plt.tight_layout()
+        lstm_path = save_visualization(symbol, "LSTM", fig)
+        db.store_visualization_path(symbol, "LSTM", lstm_path)
+        
+        error_lstm = float(math.sqrt(mean_squared_error(real_stock_price, predicted_stock_price)))
+        
+        # Get the forecast
+        forecasted_stock_price = regressor.predict(X_forecast)
+        forecasted_stock_price = sc.inverse_transform(forecasted_stock_price)
+        lstm_pred = float(forecasted_stock_price[0,0])
+        
+        return lstm_pred, error_lstm
+        
+    except Exception as e:
+        print(f"Error in LSTM algorithm: {str(e)}")
+        raise ValueError(f"Error in LSTM prediction: {str(e)}")
+
+def LIN_REG_ALGO(df, symbol: str):
+    forecast_out = int(7)
+    df['Close after n days'] = df['Close'].shift(-forecast_out)
+    df_new = df[['Close', 'Close after n days']]
+    
+    y = np.array(df_new.iloc[:-forecast_out,-1])
+    y = np.reshape(y, (-1,1))
+    X = np.array(df_new.iloc[:-forecast_out,0:-1])
+    X_to_be_forecasted = np.array(df_new.iloc[-forecast_out:,0:-1])
+    
+    X_train = X[0:int(0.8*len(df)),:]
+    X_test = X[int(0.8*len(df)):,:]
+    y_train = y[0:int(0.8*len(df)),:]
+    y_test = y[int(0.8*len(df)):,:]
+    
+    sc = StandardScaler()
+    X_train = sc.fit_transform(X_train)
+    X_test = sc.transform(X_test)
+    X_to_be_forecasted = sc.transform(X_to_be_forecasted)
+    
+    clf = LinearRegression(n_jobs=-1)
+    clf.fit(X_train, y_train)
+    
+    y_test_pred = clf.predict(X_test)
+    y_test_pred = y_test_pred*(1.04)
+    
+    # Plot Linear Regression predictions with title and labels
+    fig = plt.figure(figsize=(10, 6), dpi=100)
+    plt.plot(y_test, label='Actual Price')
+    plt.plot(y_test_pred, label='Predicted Price')
+    plt.title('Linear Regression Predictions')
+    plt.xlabel('Time')
+    plt.ylabel('Price')
+    plt.legend(loc=4)
+    plt.tight_layout()
+    lr_path = save_visualization(symbol, "LR", fig)
+    db.store_visualization_path(symbol, "LR", lr_path)
+    
+    error_lr = math.sqrt(mean_squared_error(y_test, y_test_pred))
+    
+    forecast_set = clf.predict(X_to_be_forecasted)
+    forecast_set = forecast_set*(1.04)
+    mean = forecast_set.mean()
+    lr_pred = forecast_set[0]
+    
+    return df, lr_pred, forecast_set, mean, error_lr
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/education", response_class=HTMLResponse)
+async def education(request: Request):
+    return templates.TemplateResponse("education.html", {"request": request})
+
+@app.post("/predict", response_class=HTMLResponse)
+async def predict(request: Request, symbol: str = Form(...)):
+    try:
+        cached_predictions = db.get_cached_predictions(symbol)
+        
+        if not db.needs_prediction_update(symbol) and cached_predictions:
+            print(f"Using cached predictions for {symbol}")
+            # Ensure predictions is properly decoded from JSON if needed
+            predictions = json.loads(cached_predictions) if isinstance(cached_predictions, str) else cached_predictions
+            
+            # Get the latest stock data
+            df = await get_historical(symbol)
+            latest_data = df.iloc[-1]
+        else:
+            print(f"Generating new predictions for {symbol}")
+            
+            # Get historical data
+            df = await get_historical(symbol)
+            if df.empty:
+                return templates.TemplateResponse("index.html", 
+                                               {"request": request, 
+                                                "error": f"No data available for {symbol}"})
+            
+            # Run predictions with symbol parameter
+            arima_pred, error_arima = ARIMA_ALGO(df, symbol)
+            lstm_pred, error_lstm = LSTM_ALGO(df, symbol)
+            df, lr_pred, forecast_set, mean, error_lr = LIN_REG_ALGO(df, symbol)
+            
+            # Get visualization paths
+            viz_paths = db.get_visualization_paths(symbol)
+            
+            # Store predictions
+            predictions = {
+                "symbol": symbol,
+                "arima_pred": float(arima_pred),
+                "lstm_pred": float(lstm_pred),
+                "lr_pred": float(lr_pred),
+                "error_arima": float(error_arima),
+                "error_lstm": float(error_lstm),
+                "error_lr": float(error_lr),
+                "forecast_set": forecast_set.tolist(),
+                "mean": float(mean),
+                "visualization_paths": viz_paths
+            }
+            # Convert to JSON string before storing
+            db.store_cached_predictions(symbol, json.dumps(predictions))
+            
+            latest_data = df.iloc[-1]
+        
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "prediction": True,
+                "symbol": symbol,
+                "arima_pred": predictions["arima_pred"],
+                "lstm_pred": predictions["lstm_pred"],
+                "lr_pred": predictions["lr_pred"],
+                "error_arima": predictions["error_arima"],
+                "error_lstm": predictions["error_lstm"],
+                "error_lr": predictions["error_lr"],
+                "open_s": f"{latest_data['Open']:.2f}",
+                "close_s": f"{latest_data['Close']:.2f}",
+                "adj_close": f"{latest_data['Adj Close']:.2f}",
+                "high_s": f"{latest_data['High']:.2f}",
+                "low_s": f"{latest_data['Low']:.2f}",
+                "vol": f"{latest_data['Volume']:,}",
+                "viz_paths": predictions["visualization_paths"]
+            }
+        )
+    except Exception as e:
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "error": f"An error occurred: {str(e)}"
+            }
+        )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+database.py
+
+
+
+

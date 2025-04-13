@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Prediction Results</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Stock Prediction Results for {{ quote }}</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Current Stock Data</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <tr><td>Open:</td><td>${{ open_s }}</td></tr>
+                            <tr><td>Close:</td><td>${{ close_s }}</td></tr>
+                            <tr><td>Adj Close:</td><td>${{ adj_close }}</td></tr>
+                            <tr><td>High:</td><td>${{ high_s }}</td></tr>
+                            <tr><td>Low:</td><td>${{ low_s }}</td></tr>
+                            <tr><td>Volume:</td><td>{{ vol }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Price Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <tr><td>ARIMA Prediction:</td><td>${{ arima_pred }} <small class="text-muted">(Error: {{ error_arima }})</small></td></tr>
+                            <tr><td>LSTM Prediction:</td><td>${{ lstm_pred }} <small class="text-muted">(Error: {{ error_lstm }})</small></td></tr>
+                            <tr><td>Linear Regression:</td><td>${{ lr_pred }} <small class="text-muted">(Error: {{ error_lr }})</small></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Plots -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Prediction Analysis Graphs</h2>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Stock Price Trends</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/Trends.png" class="img-fluid" alt="Stock Trends">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">ARIMA Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/ARIMA.png" class="img-fluid" alt="ARIMA Predictions">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">LSTM Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/LSTM.png" class="img-fluid" alt="LSTM Predictions">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Linear Regression Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/LR.png" class="img-fluid" alt="Linear Regression Predictions">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Make Another Prediction</a>
+        </div>
+    </div>
+</body>
+</html>

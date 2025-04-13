@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Market Prediction</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Stock Market Prediction</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form action="/predict" method="post">
+                    <div class="form-group">
+                        <label for="symbol">Stock Symbol:</label>
+                        <input type="text" class="form-control" id="symbol" name="symbol" 
+                               placeholder="Enter stock symbol (e.g., AAPL)" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Predict</button>
+                </form>
+            </div>
+        </div>
+
+        {% if prediction %}
+        <h1 class="text-center mb-4">Stock Prediction Results for {{ symbol }}</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Current Stock Data</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <tr><td>Open:</td><td>${{ open_s }}</td></tr>
+                            <tr><td>Close:</td><td>${{ close_s }}</td></tr>
+                            <tr><td>Adj Close:</td><td>${{ adj_close }}</td></tr>
+                            <tr><td>High:</td><td>${{ high_s }}</td></tr>
+                            <tr><td>Low:</td><td>${{ low_s }}</td></tr>
+                            <tr><td>Volume:</td><td>{{ vol }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Price Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <tr>
+                                <td>ARIMA Prediction:</td>
+                                <td>${{ "%.2f"|format(arima_pred) }} <small class="text-muted">(Error: {{ "%.2f"|format(error_arima) }})</small></td>
+                            </tr>
+                            <tr>
+                                <td>LSTM Prediction:</td>
+                                <td>${{ "%.2f"|format(lstm_pred) }} <small class="text-muted">(Error: {{ "%.2f"|format(error_lstm) }})</small></td>
+                            </tr>
+                            <tr>
+                                <td>Linear Regression:</td>
+                                <td>${{ "%.2f"|format(lr_pred) }} <small class="text-muted">(Error: {{ "%.2f"|format(error_lr) }})</small></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Analysis Graphs -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Prediction Analysis Graphs</h2>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Stock Price Trends</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/{{ viz_paths['Trends'].path }}" class="img-fluid" alt="Stock Trends">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">ARIMA Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/{{ viz_paths['ARIMA'].path }}" class="img-fluid" alt="ARIMA Predictions">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">LSTM Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/{{ viz_paths['LSTM'].path }}" class="img-fluid" alt="LSTM Predictions">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Linear Regression Predictions</h3>
+                    </div>
+                    <div class="card-body">
+                        <img src="/static/{{ viz_paths['LR'].path }}" class="img-fluid" alt="Linear Regression Predictions">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
