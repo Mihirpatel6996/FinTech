@@ -124,14 +124,15 @@ class StockDatabase:
 
     def store_prediction(self, symbol: str, model_type: str, prediction: float, target_date: datetime):
         with sqlite3.connect(self.db_path) as conn:
+            # Use INSERT OR REPLACE to handle duplicate entries
             conn.execute("""
-                INSERT INTO prediction_history 
+                INSERT OR REPLACE INTO prediction_history 
                 (symbol, prediction_date, target_date, model_type, predicted_value)
                 VALUES (?, ?, ?, ?, ?)
             """, (
                 symbol,
-                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Convert to string
-                target_date.strftime('%Y-%m-%d'),              # Convert to string
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                target_date.strftime('%Y-%m-%d'),
                 model_type,
                 prediction
             ))

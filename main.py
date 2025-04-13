@@ -43,6 +43,10 @@ async def get_historical(quote: str) -> pd.DataFrame:
         end = datetime.now()
         start = datetime(end.year-2, end.month, end.day)
         
+        # Add debug logging
+        print(f"Fetching data from {start} to {end}")
+        print(f"Training period: {(end - start).days} days")
+        
         # First check cache
         if not db.needs_update(quote):
             stored_data = await db.get_stock_data(quote, start, end)
@@ -344,6 +348,18 @@ def LIN_REG_ALGO(df, symbol: str):
     
     return df, lr_pred, forecast_set, mean, error_lr
 
+async def store_model_prediction(symbol: str, model_type: str, prediction: float, current_date: datetime):
+    try:
+        db.store_prediction(
+            symbol=symbol,
+            model_type=model_type,
+            prediction=prediction,
+            target_date=current_date + timedelta(days=1)
+        )
+    except Exception as e:
+        print(f"Warning: Failed to store {model_type} prediction for {symbol}: {e}")
+        # Continue execution despite storage failure
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -385,27 +401,10 @@ async def predict(request: Request, symbol: str = Form(...)):
             df = await get_historical(symbol)
             latest_data = df.iloc[-1]
             
-            # Store prediction in history table
-            db.store_prediction(
-                symbol=symbol,
-                model_type="ARIMA",
-                prediction=predictions["arima_pred"],
-                target_date=current_date + timedelta(days=1)
-            )
-            
-            db.store_prediction(
-                symbol=symbol,
-                model_type="LSTM",
-                prediction=predictions["lstm_pred"],
-                target_date=current_date + timedelta(days=1)
-            )
-            
-            db.store_prediction(
-                symbol=symbol,
-                model_type="LINEAR",
-                prediction=predictions["lr_pred"],
-                target_date=current_date + timedelta(days=1)
-            )
+            # Store predictions in history table with error handling
+            await store_model_prediction(symbol, "ARIMA", predictions["arima_pred"], current_date)
+            await store_model_prediction(symbol, "LSTM", predictions["lstm_pred"], current_date)
+            await store_model_prediction(symbol, "LINEAR", predictions["lr_pred"], current_date)
             
         else:
             print(f"Generating new predictions for {symbol}")
@@ -422,27 +421,10 @@ async def predict(request: Request, symbol: str = Form(...)):
             lstm_pred, error_lstm = LSTM_ALGO(df, symbol)
             df, lr_pred, forecast_set, mean, error_lr = LIN_REG_ALGO(df, symbol)
             
-            # Store predictions in history table
-            db.store_prediction(
-                symbol=symbol,
-                model_type="ARIMA",
-                prediction=arima_pred,
-                target_date=current_date + timedelta(days=1)
-            )
-            
-            db.store_prediction(
-                symbol=symbol,
-                model_type="LSTM",
-                prediction=lstm_pred,
-                target_date=current_date + timedelta(days=1)
-            )
-            
-            db.store_prediction(
-                symbol=symbol,
-                model_type="LINEAR",
-                prediction=lr_pred,
-                target_date=current_date + timedelta(days=1)
-            )
+            # Store predictions in history table with error handling
+            await store_model_prediction(symbol, "ARIMA", arima_pred, current_date)
+            await store_model_prediction(symbol, "LSTM", lstm_pred, current_date)
+            await store_model_prediction(symbol, "LINEAR", lr_pred, current_date)
             
             # Get visualization paths
             viz_paths = db.get_visualization_paths(symbol)
