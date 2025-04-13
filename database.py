@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime, timedelta
 import pandas as pd
-from typing import Optional, Tuple
+from typing import Optional, List, Dict, Any, Tuple
 import json
 
 class StockDatabase:
@@ -22,7 +22,7 @@ class StockDatabase:
                     PRIMARY KEY (date, symbol)
                 )
             """)
-            
+
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS symbol_metadata (
                     symbol TEXT PRIMARY KEY,
@@ -32,7 +32,7 @@ class StockDatabase:
                     last_date TEXT
                 )
             """)
-            
+
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS prediction_history (
                     symbol TEXT,
@@ -67,24 +67,46 @@ class StockDatabase:
                 )
             """)
 
+            # Add new table for model training history
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS model_training_history (
+                    symbol TEXT,
+                    model_type TEXT,
+                    training_date TEXT,
+                    data_points INTEGER,
+                    incremental BOOLEAN,
+                    training_error REAL,
+                    PRIMARY KEY (symbol, model_type, training_date)
+                )
+            """)
+
+            # Add new table for ensemble weights
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS ensemble_weights (
+                    symbol TEXT PRIMARY KEY,
+                    weights TEXT,  -- JSON string of weights
+                    timestamp TEXT
+                )
+            """)
+
     async def get_stock_data(self, symbol: str, start_date: datetime, end_date: datetime) -> Optional[pd.DataFrame]:
         with sqlite3.connect(self.db_path) as conn:
             query = """
-                SELECT * FROM stock_data 
+                SELECT * FROM stock_data
                 WHERE symbol = ? AND date BETWEEN ? AND ?
                 ORDER BY date
             """
             # Convert dates to strings in ISO format
             start_str = start_date.strftime('%Y-%m-%d')
             end_str = end_date.strftime('%Y-%m-%d')
-            
+
             df = pd.read_sql_query(query, conn, params=(symbol, start_str, end_str))
-            
+
             if not df.empty:
                 # Convert date string back to datetime
                 df['date'] = pd.to_datetime(df['date'])
                 df.set_index('date', inplace=True)
-            
+
             return df if not df.empty else None
 
     def store_stock_data(self, symbol: str, df: pd.DataFrame):
@@ -92,7 +114,7 @@ class StockDatabase:
             # Prepare the dataframe for storage
             df_to_store = df.copy()
             df_to_store['symbol'] = symbol
-            
+
             # Ensure column names match the database schema
             df_to_store = df_to_store.rename(columns={
                 'Adj Close': 'Adj Close',  # Keep the space in column name
@@ -102,16 +124,16 @@ class StockDatabase:
                 'Close': 'Close',
                 'Volume': 'Volume'
             })
-            
+
             # Delete existing data for this symbol
             conn.execute("DELETE FROM stock_data WHERE symbol = ?", (symbol,))
-            
+
             # Insert new data
             df_to_store.to_sql('stock_data', conn, if_exists='append', index=True, index_label='date')
-            
+
             # Update metadata
             conn.execute("""
-                INSERT OR REPLACE INTO symbol_metadata 
+                INSERT OR REPLACE INTO symbol_metadata
                 (symbol, last_updated, data_quality, first_date, last_date)
                 VALUES (?, ?, ?, ?, ?)
             """, (
@@ -126,7 +148,7 @@ class StockDatabase:
         with sqlite3.connect(self.db_path) as conn:
             # Use INSERT OR REPLACE to handle duplicate entries
             conn.execute("""
-                INSERT OR REPLACE INTO prediction_history 
+                INSERT OR REPLACE INTO prediction_history
                 (symbol, prediction_date, target_date, model_type, predicted_value)
                 VALUES (?, ?, ?, ?, ?)
             """, (
@@ -165,7 +187,7 @@ class StockDatabase:
     def store_visualization_path(self, symbol: str, model_type: str, file_path: str):
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
-                INSERT OR REPLACE INTO visualization_paths 
+                INSERT OR REPLACE INTO visualization_paths
                 (symbol, model_type, file_path, created_date)
                 VALUES (?, ?, ?, ?)
             """, (
@@ -183,7 +205,7 @@ class StockDatabase:
                 FROM visualization_paths
                 WHERE symbol = ?
             """, (symbol,))
-            
+
             results = cursor.fetchall()
             return {row[0]: {'path': row[1], 'created_date': row[2]} for row in results}
 
@@ -195,13 +217,13 @@ class StockDatabase:
                 WHERE symbol = ?
             """, (symbol,))
             result = cursor.fetchone()
-            
+
             if not result:
                 return True
-                
+
             last_update = datetime.strptime(result[0], '%Y-%m-%d').date()
             current_date = datetime.now().date()
-            
+
             return current_date > last_update
 
     def get_cached_predictions(self, symbol: str) -> dict:
@@ -213,7 +235,7 @@ class StockDatabase:
                 WHERE symbol = ?
             """, (symbol,))
             result = cursor.fetchone()
-            
+
             if result:
                 try:
                     return json.loads(result[0])
@@ -236,4 +258,74 @@ class StockDatabase:
                 current_date
             ))
 
+    def store_model_training(self, symbol: str, model_type: str, data_points: int, incremental: bool, training_error: float):
+        """Store model training information in database"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                INSERT INTO model_training_history
+                (symbol, model_type, training_date, data_points, incremental, training_error)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                symbol,
+                model_type,
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                data_points,
+                incremental,
+                training_error
+            ))
+
+    def get_ensemble_weights(self, symbol: str) -> Dict[str, float]:
+        """Get ensemble weights from database"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT weights FROM ensemble_weights
+                WHERE symbol = ?
+            """, (symbol,))
+
+            result = cursor.fetchone()
+            if result:
+                try:
+                    return json.loads(result[0])
+                except json.JSONDecodeError:
+                    pass
+
+            # Default weights if none found
+            return {
+                "ARIMA": 0.33,
+                "LSTM": 0.33,
+                "LINEAR": 0.34
+            }
+
+    def get_model_performance(self, symbol: str, model_type: str, days: int = 30) -> float:
+        """Get average error rate for a model over the specified number of days"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            threshold_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
+
+            cursor.execute("""
+                SELECT AVG(error_rate) FROM prediction_history
+                WHERE symbol = ? AND model_type = ?
+                AND prediction_date >= ? AND actual_value IS NOT NULL
+            """, (symbol, model_type, threshold_date))
+
+            result = cursor.fetchone()
+            if result and result[0] is not None:
+                return float(result[0])
+            return 1.0  # Default high error if no data
+
+    def get_pending_predictions(self, symbol: str, target_date: str) -> List[Tuple[str, str, float]]:
+        """Get predictions that need to be updated with actual values"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT prediction_date, model_type, predicted_value
+                FROM prediction_history
+                WHERE symbol = ?
+                AND date(target_date) = date(?)
+                AND actual_value IS NULL
+            """, (symbol, target_date))
+
+            return cursor.fetchall()
 
