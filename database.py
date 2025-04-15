@@ -89,6 +89,18 @@ class StockDatabase:
                 )
             """)
 
+            # Add new table for sentiment analysis
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS sentiment_analysis (
+                    symbol TEXT,
+                    analysis_date TEXT,
+                    sentiment_score REAL,
+                    news_count INTEGER,
+                    news_data TEXT,  -- JSON string of news articles and their sentiment
+                    PRIMARY KEY (symbol, analysis_date)
+                )
+            """)
+
     async def get_stock_data(self, symbol: str, start_date: datetime, end_date: datetime) -> Optional[pd.DataFrame]:
         with sqlite3.connect(self.db_path) as conn:
             query = """
@@ -328,4 +340,42 @@ class StockDatabase:
             """, (symbol, target_date))
 
             return cursor.fetchall()
+
+    def store_sentiment_analysis(self, symbol: str, sentiment_score: float, news_count: int, news_data: str):
+        """Store sentiment analysis results in database"""
+        with sqlite3.connect(self.db_path) as conn:
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            conn.execute("""
+                INSERT OR REPLACE INTO sentiment_analysis
+                (symbol, analysis_date, sentiment_score, news_count, news_data)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                symbol,
+                current_date,
+                sentiment_score,
+                news_count,
+                news_data  # JSON string of news articles
+            ))
+
+    def get_sentiment_analysis(self, symbol: str) -> Dict:
+        """Get sentiment analysis results for a symbol"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT analysis_date, sentiment_score, news_count, news_data
+                FROM sentiment_analysis
+                WHERE symbol = ?
+                ORDER BY analysis_date DESC
+                LIMIT 1
+            """, (symbol,))
+
+            result = cursor.fetchone()
+            if result:
+                return {
+                    "analysis_date": result[0],
+                    "sentiment_score": result[1],
+                    "news_count": result[2],
+                    "news_data": result[3]  # JSON string of news articles
+                }
+            return {}
 

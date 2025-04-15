@@ -27,11 +27,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from model_persistence import ModelPersistence
 from ensemble import EnsemblePredictor
+from sentiment_service import SentimentAnalysisService
 
 # Initialize database and model persistence
 db = StockDatabase()
 model_persistence = ModelPersistence()
 ensemble_predictor = EnsemblePredictor(db)
+sentiment_service = SentimentAnalysisService(db, use_mock=False)  # Use real NewsAPI service
 
 # Delete existing database file if you want to start fresh (optional)
 # if os.path.exists("stock_data.db"):
@@ -593,6 +595,13 @@ async def predict(request: Request, symbol: str = Form(...)):
             # Get visualization paths
             viz_paths = db.get_visualization_paths(symbol)
 
+            # Get sentiment analysis
+            sentiment_data = sentiment_service.analyze_sentiment(symbol)
+            sentiment_score = sentiment_data.get("sentiment_score", 0.0)
+            sentiment_description = sentiment_service.get_sentiment_description(sentiment_score)
+            sentiment_color = sentiment_service.get_sentiment_color(sentiment_score)
+            is_mock = sentiment_data.get("is_mock", False)
+
             # Store predictions
             predictions = {
                 "symbol": symbol,
@@ -605,7 +614,12 @@ async def predict(request: Request, symbol: str = Form(...)):
                 "error_lr": float(error_lr),
                 "forecast_set": forecast_set.tolist(),
                 "mean": float(mean),
-                "visualization_paths": viz_paths
+                "visualization_paths": viz_paths,
+                "sentiment_score": sentiment_score,
+                "sentiment_description": sentiment_description,
+                "sentiment_color": sentiment_color,
+                "sentiment_data": sentiment_data,
+                "is_mock": is_mock
             }
             # Convert to JSON string before storing
             db.store_cached_predictions(symbol, json.dumps(predictions))
@@ -634,7 +648,12 @@ async def predict(request: Request, symbol: str = Form(...)):
                 "high_s": f"{latest_data['High']:.2f}",
                 "low_s": f"{latest_data['Low']:.2f}",
                 "vol": f"{latest_data['Volume']:,}",
-                "viz_paths": predictions["visualization_paths"]
+                "viz_paths": predictions["visualization_paths"],
+                "sentiment_score": predictions.get("sentiment_score", 0.0),
+                "sentiment_description": predictions.get("sentiment_description", "Neutral"),
+                "sentiment_color": predictions.get("sentiment_color", "secondary"),
+                "sentiment_data": json.loads(predictions.get("sentiment_data", {}).get("news_data", "[]")) if isinstance(predictions.get("sentiment_data"), dict) else [],
+                "is_mock": predictions.get("is_mock", False)
             }
         )
     except asyncio.TimeoutError:
