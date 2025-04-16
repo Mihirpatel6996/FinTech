@@ -521,9 +521,13 @@ class TechnicalIndicators:
             # Plot the candlestick chart
             try:
                 # Try to plot with volume
-                mpf.plot(plot_data, type='candle', style=s,
-                        ax=axes[0], volume=axes[1],
-                        addplot=apds if apds else None)
+                if apds:
+                    mpf.plot(plot_data, type='candle', style=s,
+                            ax=axes[0], volume=axes[1],
+                            addplot=apds)
+                else:
+                    mpf.plot(plot_data, type='candle', style=s,
+                            ax=axes[0], volume=axes[1])
 
                 axes[0].set_title('Candlestick Chart')
                 plt.tight_layout()
@@ -535,7 +539,10 @@ class TechnicalIndicators:
                 fig, ax = plt.subplots(figsize=(12, 6))
 
                 try:
-                    mpf.plot(plot_data, type='candle', style=s, ax=ax, addplot=apds if apds else None)
+                    if apds:
+                        mpf.plot(plot_data, type='candle', style=s, ax=ax, addplot=apds)
+                    else:
+                        mpf.plot(plot_data, type='candle', style=s, ax=ax)
                     ax.set_title('Candlestick Chart (No Volume)')
                     plt.tight_layout()
                     return fig

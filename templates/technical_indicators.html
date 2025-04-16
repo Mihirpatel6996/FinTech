@@ -7,6 +7,8 @@
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
     <link rel="stylesheet" href="/static/style.css" />
+    <!-- Load Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   </head>
   <body>
     <div class="container mt-5">
@@ -46,9 +48,9 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="mb-0">Interactive Chart</h3>
+              <h3 class="mb-0">Interactive Candlestick Chart</h3>
             </div>
-            <div class="card-body">{{ candlestick_html|safe }}</div>
+            <div class="card-body">{{ viz_paths.candlestick_html|safe }}</div>
           </div>
         </div>
       </div>
@@ -73,11 +75,10 @@
                   {{ analysis_report.indicators.RSI.signal }}</span
                 >
               </p>
-              <img
-                src="/static/{{ viz_paths.get('RSI', '') }}"
-                class="img-fluid"
-                alt="RSI Chart"
-              />
+              {% if viz_paths.get('RSI_html') %} {{ viz_paths.RSI_html|safe }}
+              {% else %}
+              <div class="alert alert-info">RSI chart not available</div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -107,11 +108,10 @@
                   {{ analysis_report.indicators.MACD.signal }}</span
                 >
               </p>
-              <img
-                src="/static/{{ viz_paths.get('MACD', '') }}"
-                class="img-fluid"
-                alt="MACD Chart"
-              />
+              {% if viz_paths.get('MACD_html') %} {{ viz_paths.MACD_html|safe }}
+              {% else %}
+              <div class="alert alert-info">MACD chart not available</div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -144,11 +144,12 @@
                   {{ analysis_report.indicators.Bollinger_Bands.signal }}</span
                 >
               </p>
-              <img
-                src="/static/{{ viz_paths.get('BB', '') }}"
-                class="img-fluid"
-                alt="Bollinger Bands Chart"
-              />
+              {% if viz_paths.get('BB_html') %} {{ viz_paths.BB_html|safe }} {%
+              else %}
+              <div class="alert alert-info">
+                Bollinger Bands chart not available
+              </div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -170,12 +171,12 @@
                   {}).get('signal', 'N/A') }}</span
                 >
               </p>
-              {% endif %} {% endfor %}
-              <img
-                src="/static/{{ viz_paths.get('MA', '') }}"
-                class="img-fluid"
-                alt="Moving Averages Chart"
-              />
+              {% endif %} {% endfor %} {% if viz_paths.get('MA_html') %} {{
+              viz_paths.MA_html|safe }} {% else %}
+              <div class="alert alert-info">
+                Moving Averages chart not available
+              </div>
+              {% endif %}
             </div>
           </div>
         </div>

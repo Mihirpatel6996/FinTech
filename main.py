@@ -1003,52 +1003,191 @@ async def get_technical_indicators(request: Request, symbol: str = Form(...), in
                 # Save visualizations
                 viz_paths = {}
 
+                # Generate interactive charts
                 try:
-                    # Create a simple candlestick chart
-                    candlestick_fig = technical_indicator.plot_candlestick(df)
-                    viz_paths['Candlestick'] = save_visualization(symbol, "candlestick", candlestick_fig)
-                except Exception as e:
-                    print(f"Error creating candlestick chart: {str(e)}")
+                    # Create interactive candlestick chart
+                    candlestick_html = enhanced_viz.create_interactive_chart_html(df, indicators, f"{symbol} Price Chart")
 
-                try:
-                    # RSI chart
+                    # Create interactive RSI chart
                     rsi = indicators.get('RSI')
                     if rsi is not None and not rsi.empty and not rsi.isna().all():
-                        rsi_fig = technical_indicator.plot_rsi(df, rsi)
-                        viz_paths['RSI'] = save_visualization(symbol, "rsi", rsi_fig)
+                        import plotly.graph_objects as go
+                        from plotly.subplots import make_subplots
+
+                        # Create RSI figure
+                        rsi_fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                                              vertical_spacing=0.03, subplot_titles=(f"{symbol} Price", "RSI"),
+                                              row_heights=[0.7, 0.3])
+
+                        # Add price chart
+                        rsi_fig.add_trace(
+                            go.Scatter(x=df.index, y=df['Close'], name='Close Price'),
+                            row=1, col=1
+                        )
+
+                        # Add RSI
+                        rsi_fig.add_trace(
+                            go.Scatter(x=df.index, y=rsi, name='RSI', line=dict(color='purple')),
+                            row=2, col=1
+                        )
+
+                        # Add RSI reference lines
+                        rsi_fig.add_hline(y=70, line_dash="dash", line_color="red", row=2, col=1)
+                        rsi_fig.add_hline(y=30, line_dash="dash", line_color="green", row=2, col=1)
+
+                        # Update layout
+                        rsi_fig.update_layout(height=600, showlegend=True)
+                        rsi_fig.update_yaxes(title_text="Price", row=1, col=1)
+                        rsi_fig.update_yaxes(title_text="RSI", range=[0, 100], row=2, col=1)
+
+                        # Convert to HTML
+                        rsi_html = rsi_fig.to_html(include_plotlyjs=False, full_html=False)
+                        viz_paths['RSI_html'] = rsi_html
                 except Exception as e:
                     print(f"Error creating RSI chart: {str(e)}")
 
                 try:
-                    # MACD chart
+                    # Create interactive MACD chart
                     macd_line = indicators.get('MACD_line')
                     signal_line = indicators.get('MACD_signal')
                     histogram = indicators.get('MACD_histogram')
+
                     if all([macd_line is not None, signal_line is not None, histogram is not None]) and \
                        not macd_line.empty and not signal_line.empty and not histogram.empty:
-                        macd_fig = technical_indicator.plot_macd(df, macd_line, signal_line, histogram)
-                        viz_paths['MACD'] = save_visualization(symbol, "macd", macd_fig)
+                        import plotly.graph_objects as go
+                        from plotly.subplots import make_subplots
+
+                        # Create MACD figure
+                        macd_fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                                               vertical_spacing=0.03, subplot_titles=(f"{symbol} Price", "MACD"),
+                                               row_heights=[0.7, 0.3])
+
+                        # Add price chart
+                        macd_fig.add_trace(
+                            go.Scatter(x=df.index, y=df['Close'], name='Close Price'),
+                            row=1, col=1
+                        )
+
+                        # Add MACD components
+                        macd_fig.add_trace(
+                            go.Scatter(x=df.index, y=macd_line, name='MACD Line', line=dict(color='blue')),
+                            row=2, col=1
+                        )
+                        macd_fig.add_trace(
+                            go.Scatter(x=df.index, y=signal_line, name='Signal Line', line=dict(color='red')),
+                            row=2, col=1
+                        )
+
+                        # Add histogram as bar chart
+                        colors = ['green' if val > 0 else 'red' for val in histogram]
+                        macd_fig.add_trace(
+                            go.Bar(x=df.index, y=histogram, name='Histogram', marker_color=colors),
+                            row=2, col=1
+                        )
+
+                        # Update layout
+                        macd_fig.update_layout(height=600, showlegend=True)
+                        macd_fig.update_yaxes(title_text="Price", row=1, col=1)
+                        macd_fig.update_yaxes(title_text="MACD", row=2, col=1)
+
+                        # Convert to HTML
+                        macd_html = macd_fig.to_html(include_plotlyjs=False, full_html=False)
+                        viz_paths['MACD_html'] = macd_html
                 except Exception as e:
                     print(f"Error creating MACD chart: {str(e)}")
 
                 try:
-                    # Bollinger Bands chart
+                    # Create interactive Bollinger Bands chart
                     middle_band = indicators.get('BB_middle')
                     upper_band = indicators.get('BB_upper')
                     lower_band = indicators.get('BB_lower')
+
                     if all([middle_band is not None, upper_band is not None, lower_band is not None]) and \
                        not middle_band.empty and not upper_band.empty and not lower_band.empty:
-                        bb_fig = technical_indicator.plot_bollinger_bands(df, middle_band, upper_band, lower_band)
-                        viz_paths['BB'] = save_visualization(symbol, "bollinger", bb_fig)
+                        import plotly.graph_objects as go
+
+                        # Create Bollinger Bands figure
+                        bb_fig = go.Figure()
+
+                        # Add candlestick chart
+                        bb_fig.add_trace(
+                            go.Candlestick(
+                                x=df.index,
+                                open=df['Open'],
+                                high=df['High'],
+                                low=df['Low'],
+                                close=df['Close'],
+                                name='OHLC'
+                            )
+                        )
+
+                        # Add Bollinger Bands
+                        bb_fig.add_trace(go.Scatter(x=df.index, y=upper_band, name='Upper Band', line=dict(color='red', dash='dash')))
+                        bb_fig.add_trace(go.Scatter(x=df.index, y=middle_band, name='Middle Band', line=dict(color='blue', dash='dash')))
+                        bb_fig.add_trace(go.Scatter(x=df.index, y=lower_band, name='Lower Band', line=dict(color='green', dash='dash')))
+
+                        # Fill between upper and lower bands
+                        bb_fig.add_trace(go.Scatter(
+                            x=df.index.tolist() + df.index.tolist()[::-1],
+                            y=upper_band.tolist() + lower_band.tolist()[::-1],
+                            fill='toself',
+                            fillcolor='rgba(0,100,80,0.2)',
+                            line=dict(color='rgba(255,255,255,0)'),
+                            hoverinfo='skip',
+                            showlegend=False
+                        ))
+
+                        # Update layout
+                        bb_fig.update_layout(
+                            title=f"{symbol} Bollinger Bands",
+                            xaxis_title="Date",
+                            yaxis_title="Price",
+                            height=600,
+                            xaxis_rangeslider_visible=False
+                        )
+
+                        # Convert to HTML
+                        bb_html = bb_fig.to_html(include_plotlyjs=False, full_html=False)
+                        viz_paths['BB_html'] = bb_html
                 except Exception as e:
                     print(f"Error creating Bollinger Bands chart: {str(e)}")
 
                 try:
-                    # Moving Averages chart
+                    # Create interactive Moving Averages chart
                     ma_dict = {k: v for k, v in indicators.items() if k.startswith('SMA_') or k.startswith('EMA_')}
+
                     if ma_dict and any(not v.empty for v in ma_dict.values()):
-                        ma_fig = technical_indicator.plot_moving_averages(df, ma_dict)
-                        viz_paths['MA'] = save_visualization(symbol, "moving_averages", ma_fig)
+                        import plotly.graph_objects as go
+
+                        # Create Moving Averages figure
+                        ma_fig = go.Figure()
+
+                        # Add price chart
+                        ma_fig.add_trace(go.Scatter(x=df.index, y=df['Close'], name='Close Price', line=dict(color='black')))
+
+                        # Add Moving Averages
+                        colors = ['blue', 'green', 'red', 'purple', 'orange', 'brown']
+                        for i, (name, values) in enumerate(ma_dict.items()):
+                            if not values.empty and not values.isna().all():
+                                ma_fig.add_trace(go.Scatter(
+                                    x=df.index,
+                                    y=values,
+                                    name=name,
+                                    line=dict(color=colors[i % len(colors)])
+                                ))
+
+                        # Update layout
+                        ma_fig.update_layout(
+                            title=f"{symbol} Moving Averages",
+                            xaxis_title="Date",
+                            yaxis_title="Price",
+                            height=600,
+                            xaxis_rangeslider_visible=False
+                        )
+
+                        # Convert to HTML
+                        ma_html = ma_fig.to_html(include_plotlyjs=False, full_html=False)
+                        viz_paths['MA_html'] = ma_html
                 except Exception as e:
                     print(f"Error creating Moving Averages chart: {str(e)}")
 
@@ -1068,6 +1207,9 @@ async def get_technical_indicators(request: Request, symbol: str = Form(...), in
                     print(f"Error generating analysis report: {str(e)}")
                     analysis_report = {"overall_signal": "Neutral", "signals": {}}
 
+                # Add candlestick chart to viz_paths
+                viz_paths['candlestick_html'] = candlestick_html
+
                 return templates.TemplateResponse(
                     "technical_indicators.html",
                     {
@@ -1077,7 +1219,8 @@ async def get_technical_indicators(request: Request, symbol: str = Form(...), in
                         "viz_paths": viz_paths,
                         "analysis_report": analysis_report,
                         "latest_price": df['Close'].iloc[-1],
-                        "latest_date": df.index[-1].strftime('%Y-%m-%d')
+                        "latest_date": df.index[-1].strftime('%Y-%m-%d'),
+                        "plotly_loaded": False  # Flag to indicate if Plotly JS is already loaded
                     }
                 )
             except Exception as e:
