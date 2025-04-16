@@ -101,6 +101,54 @@ class StockDatabase:
                 )
             """)
 
+            # Add tables for portfolio management
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS portfolios (
+                    portfolio_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    description TEXT,
+                    created_date TEXT,
+                    last_updated TEXT
+                )
+            """)
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS portfolio_holdings (
+                    holding_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    portfolio_id INTEGER,
+                    symbol TEXT NOT NULL,
+                    quantity REAL NOT NULL,
+                    purchase_price REAL NOT NULL,
+                    purchase_date TEXT,
+                    FOREIGN KEY (portfolio_id) REFERENCES portfolios (portfolio_id)
+                )
+            """)
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS portfolio_transactions (
+                    transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    portfolio_id INTEGER,
+                    symbol TEXT NOT NULL,
+                    transaction_type TEXT NOT NULL,  -- 'BUY' or 'SELL'
+                    quantity REAL NOT NULL,
+                    price REAL NOT NULL,
+                    transaction_date TEXT,
+                    notes TEXT,
+                    FOREIGN KEY (portfolio_id) REFERENCES portfolios (portfolio_id)
+                )
+            """)
+
+            # Add table for technical analysis results
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS technical_analysis (
+                    symbol TEXT,
+                    analysis_date TEXT,
+                    indicators TEXT,  -- JSON string of technical indicators
+                    overall_signal TEXT,
+                    PRIMARY KEY (symbol, analysis_date)
+                )
+            """)
+
     async def get_stock_data(self, symbol: str, start_date: datetime, end_date: datetime) -> Optional[pd.DataFrame]:
         with sqlite3.connect(self.db_path) as conn:
             query = """

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>StockSense - Register</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .navbar {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .register-container {
+        max-width: 500px;
+        margin: 80px auto;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .card-header {
+        background: linear-gradient(135deg, #6610f2, #007bff);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 20px;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #6610f2, #007bff);
+        border: none;
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-weight: 500;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #5a0fc1, #0069d9);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .form-control {
+        border-radius: 20px;
+        padding: 10px 15px;
+      }
+      .input-group-text {
+        border-radius: 20px 0 0 20px;
+        background-color: #f8f9fa;
+      }
+      .footer {
+        background-color: #343a40;
+        color: white;
+        padding: 2rem 0;
+        margin-top: 3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/"
+          ><i class="fas fa-chart-line mr-2"></i>StockSense</a
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/portfolio">Portfolio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/education">Education</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="/login"
+                ><i class="fas fa-user mr-1"></i>Login</a
+              >
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="/register"
+                ><i class="fas fa-user-plus mr-1"></i>Register</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container register-container">
+      <div class="card">
+        <div class="card-header text-center">
+          <h3 class="mb-0"><i class="fas fa-user-plus mr-2"></i>Create Account</h3>
+        </div>
+        <div class="card-body p-4">
+          {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endif %}
+
+          <form action="/register" method="post">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="first_name">First Name</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="fas fa-user"></i>
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="first_name"
+                    name="first_name"
+                    placeholder="First Name"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="last_name">Last Name</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="fas fa-user"></i>
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="last_name"
+                    name="last_name"
+                    placeholder="Last Name"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                </div>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  placeholder="Email address"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                </div>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  placeholder="Password"
+                  required
+                />
+              </div>
+              <small class="form-text text-muted">
+                Password must be at least 8 characters long and include a mix of letters, numbers, and special characters.
+              </small>
+            </div>
+            <div class="form-group">
+              <label for="confirm_password">Confirm Password</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                </div>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirm_password"
+                  name="confirm_password"
+                  placeholder="Confirm Password"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="terms"
+                name="terms"
+                required
+              />
+              <label class="form-check-label" for="terms"
+                >I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label
+              >
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-user-plus mr-2"></i>Create Account
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            <p>
+              Already have an account?
+              <a href="/login" class="text-primary">Login here</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <h5><i class="fas fa-chart-line mr-2"></i>StockSense</h5>
+            <p>
+              Advanced stock analysis and prediction platform powered by AI and
+              machine learning.
+            </p>
+          </div>
+          <div class="col-md-4">
+            <h5>Quick Links</h5>
+            <ul class="list-unstyled">
+              <li><a href="/" class="text-light">Home</a></li>
+              <li><a href="/portfolio" class="text-light">Portfolio</a></li>
+              <li><a href="/education" class="text-light">Education</a></li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <h5>Contact</h5>
+            <p><i class="fas fa-envelope mr-2"></i>support@stocksense.com</p>
+            <p><i class="fas fa-phone mr-2"></i>(123) 456-7890</p>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12 text-center">
+            <p class="mb-0">© 2023 StockSense. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

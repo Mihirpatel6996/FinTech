@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Risk Analysis - {{ symbol }}</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center">Risk Analysis for {{ symbol }}</h1>
+      <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">
+                Current Price: ${{ "%.2f"|format(latest_price) }}
+              </h3>
+              <small class="text-muted">As of {{ latest_date }}</small>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <p>
+                    Annual Return:
+                    <strong
+                      class="{% if annual_return > 0 %}text-success{% elif annual_return < 0 %}text-danger{% endif %}"
+                    >
+                      {{ "%.2f"|format(annual_return) }}%
+                    </strong>
+                  </p>
+                  <p>
+                    Total Return:
+                    <strong
+                      class="{% if total_return > 0 %}text-success{% elif total_return < 0 %}text-danger{% endif %}"
+                    >
+                      {{ "%.2f"|format(total_return) }}%
+                    </strong>
+                  </p>
+                </div>
+                <div class="col-md-6 text-right">
+                  <a href="/" class="btn btn-primary">Back to Home</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Value at Risk (VaR)</h3>
+            </div>
+            <div class="card-body">
+              <p>
+                VaR (95%):
+                <strong>{{ "%.2f"|format(risk_metrics.var_95 * 100) }}%</strong>
+                - Maximum expected loss on 95% of trading days
+              </p>
+              <p>
+                VaR (99%):
+                <strong>{{ "%.2f"|format(risk_metrics.var_99 * 100) }}%</strong>
+                - Maximum expected loss on 99% of trading days
+              </p>
+              <p>
+                CVaR (95%):
+                <strong
+                  >{{ "%.2f"|format(risk_metrics.cvar_95 * 100) }}%</strong
+                >
+                - Expected loss when losses exceed VaR (95%)
+              </p>
+              <img
+                src="/static/{{ var_path }}"
+                class="img-fluid"
+                alt="Value at Risk"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Drawdown Analysis</h3>
+            </div>
+            <div class="card-body">
+              <p>
+                Maximum Drawdown:
+                <strong
+                  >{{ "%.2f"|format(risk_metrics.max_drawdown * 100) }}%</strong
+                >
+                - Largest peak-to-trough decline
+              </p>
+              <img
+                src="/static/{{ drawdown_path }}"
+                class="img-fluid"
+                alt="Drawdown Analysis"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Risk Metrics</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <table class="table table-striped">
+                    <tr>
+                      <td>Volatility (Annualized):</td>
+                      <td>
+                        {{ "%.2f"|format(risk_metrics.volatility * 100) }}%
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Sharpe Ratio:</td>
+                      <td>{{ "%.2f"|format(risk_metrics.sharpe_ratio) }}</td>
+                    </tr>
+                    <tr>
+                      <td>Sortino Ratio:</td>
+                      <td>{{ "%.2f"|format(risk_metrics.sortino_ratio) }}</td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-md-6">
+                  <table class="table table-striped">
+                    <tr>
+                      <td>Value at Risk (95%):</td>
+                      <td>{{ "%.2f"|format(risk_metrics.var_95 * 100) }}%</td>
+                    </tr>
+                    <tr>
+                      <td>Value at Risk (99%):</td>
+                      <td>{{ "%.2f"|format(risk_metrics.var_99 * 100) }}%</td>
+                    </tr>
+                    <tr>
+                      <td>Maximum Drawdown:</td>
+                      <td>
+                        {{ "%.2f"|format(risk_metrics.max_drawdown * 100) }}%
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Risk Interpretation</h3>
+            </div>
+            <div class="card-body">
+              <h4>Volatility</h4>
+              <p>
+                The annualized volatility of {{ symbol }} is
+                <strong
+                  >{{ "%.2f"|format(risk_metrics.volatility * 100) }}%</strong
+                >. {% if risk_metrics.volatility > 0.3 %} This indicates a
+                <strong>high level of risk</strong>. The stock price tends to
+                fluctuate significantly. {% elif risk_metrics.volatility > 0.15
+                %} This indicates a <strong>moderate level of risk</strong>. The
+                stock has typical market volatility. {% else %} This indicates a
+                <strong>low level of risk</strong>. The stock price is
+                relatively stable. {% endif %}
+              </p>
+
+              <h4>Value at Risk (VaR)</h4>
+              <p>
+                With 95% confidence, the maximum daily loss will not exceed
+                <strong>{{ "%.2f"|format(risk_metrics.var_95 * 100) }}%</strong
+                >. This means that on 95% of trading days, you would not expect
+                to lose more than this percentage of your investment. {% if
+                risk_metrics.var_95 > 0.05 %} This is a
+                <strong>high VaR</strong>, indicating significant downside risk.
+                {% elif risk_metrics.var_95 > 0.02 %} This is a
+                <strong>moderate VaR</strong>, typical for many stocks. {% else
+                %} This is a <strong>low VaR</strong>, indicating relatively low
+                downside risk. {% endif %}
+              </p>
+
+              <h4>Sharpe Ratio</h4>
+              <p>
+                The Sharpe ratio is
+                <strong>{{ "%.2f"|format(risk_metrics.sharpe_ratio) }}</strong>.
+                {% if risk_metrics.sharpe_ratio > 1 %} This is
+                <strong>good</strong>, indicating that the stock provides excess
+                returns relative to its volatility. {% elif
+                risk_metrics.sharpe_ratio > 0 %} This is
+                <strong>acceptable</strong>, but the risk-adjusted return is not
+                exceptional. {% else %} This is <strong>poor</strong>,
+                indicating that the stock does not provide adequate returns for
+                its level of risk. {% endif %}
+              </p>
+
+              <h4>Maximum Drawdown</h4>
+              <p>
+                The maximum historical drawdown is
+                <strong
+                  >{{ "%.2f"|format(risk_metrics.max_drawdown * 100) }}%</strong
+                >. {% if risk_metrics.max_drawdown > 0.5 %} This is a
+                <strong>severe drawdown</strong>, indicating that the stock has
+                experienced significant declines in the past. {% elif
+                risk_metrics.max_drawdown > 0.2 %} This is a
+                <strong>moderate drawdown</strong>, typical for many stocks
+                during market corrections. {% else %} This is a
+                <strong>mild drawdown</strong>, indicating relatively stable
+                performance even during market downturns. {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

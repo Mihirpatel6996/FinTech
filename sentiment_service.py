@@ -202,3 +202,56 @@ class SentimentAnalysisService:
             return "warning"  # Yellow
         else:
             return "danger"  # Red
+
+    def get_sentiment_for_symbol(self, symbol: str) -> list:
+        """
+        Get sentiment data for a stock symbol.
+
+        Args:
+            symbol (str): Stock symbol (e.g., 'TSLA').
+
+        Returns:
+            list: List of dictionaries containing news articles and their sentiment scores.
+        """
+        try:
+            # First check if we have cached sentiment data in the database
+            cached_sentiment = self.db.get_sentiment_analysis(symbol)
+            if cached_sentiment and cached_sentiment.get("news_data"):
+                try:
+                    # Parse the JSON string into a list of dictionaries
+                    import json
+                    news_data = json.loads(cached_sentiment["news_data"])
+                    if news_data:
+                        return news_data
+                except Exception as e:
+                    print(f"Error parsing cached sentiment data: {str(e)}")
+
+            # If no cached data or error parsing, get fresh data
+            result = self.analyze_sentiment(symbol)
+            if result and result.get("news_data"):
+                try:
+                    import json
+                    return json.loads(result["news_data"])
+                except Exception as e:
+                    print(f"Error parsing fresh sentiment data: {str(e)}")
+
+            return []
+        except Exception as e:
+            print(f"Error getting sentiment for symbol {symbol}: {str(e)}")
+            return []
+
+    def get_average_sentiment(self, sentiment_data: list) -> float:
+        """
+        Calculate the average sentiment score from sentiment data.
+
+        Args:
+            sentiment_data (list): List of dictionaries containing news articles and their sentiment scores.
+
+        Returns:
+            float: Average sentiment score between -1 (negative) and 1 (positive).
+        """
+        if not sentiment_data:
+            return 0.0
+
+        total_sentiment = sum(item.get('sentiment', 0) for item in sentiment_data)
+        return total_sentiment / len(sentiment_data)

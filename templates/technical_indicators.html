@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Technical Indicators - {{ symbol }}</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center">Technical Analysis for {{ symbol }}</h1>
+      <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">
+                Current Price: ${{ "%.2f"|format(latest_price) }}
+              </h3>
+              <small class="text-muted">As of {{ latest_date }}</small>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <h4>
+                    Overall Signal:
+                    <span
+                      class="badge {% if analysis_report.overall_signal == 'Bullish' %}badge-success {% elif analysis_report.overall_signal == 'Bearish' %}badge-danger {% elif analysis_report.overall_signal == 'Oversold' %}badge-info {% elif analysis_report.overall_signal == 'Overbought' %}badge-warning {% else %}badge-secondary{% endif %}"
+                    >
+                      {{ analysis_report.overall_signal }}</span
+                    >
+                  </h4>
+                </div>
+                <div class="col-md-6">
+                  <a href="/" class="btn btn-primary">Back to Home</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Chart -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Interactive Chart</h3>
+            </div>
+            <div class="card-body">{{ candlestick_html|safe }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Indicators -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">RSI (Relative Strength Index)</h3>
+            </div>
+            <div class="card-body">
+              <p>
+                Current Value:
+                <strong>{{ indicators.get('RSI', 'N/A') }}</strong>
+              </p>
+              <p>
+                Signal:
+                <span
+                  class="badge {% if analysis_report.indicators.RSI.signal == 'Oversold' %}badge-success {% elif analysis_report.indicators.RSI.signal == 'Overbought' %}badge-danger {% else %}badge-secondary{% endif %}"
+                >
+                  {{ analysis_report.indicators.RSI.signal }}</span
+                >
+              </p>
+              <img
+                src="/static/{{ viz_paths.get('RSI', '') }}"
+                class="img-fluid"
+                alt="RSI Chart"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">MACD (Moving Average Convergence Divergence)</h3>
+            </div>
+            <div class="card-body">
+              <p>
+                MACD Line:
+                <strong>{{ indicators.get('MACD_line', 'N/A') }}</strong>
+              </p>
+              <p>
+                Signal Line:
+                <strong>{{ indicators.get('MACD_signal', 'N/A') }}</strong>
+              </p>
+              <p>
+                Histogram:
+                <strong>{{ indicators.get('MACD_histogram', 'N/A') }}</strong>
+              </p>
+              <p>
+                Signal:
+                <span
+                  class="badge {% if analysis_report.indicators.MACD.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.MACD.signal == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
+                >
+                  {{ analysis_report.indicators.MACD.signal }}</span
+                >
+              </p>
+              <img
+                src="/static/{{ viz_paths.get('MACD', '') }}"
+                class="img-fluid"
+                alt="MACD Chart"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Bollinger Bands</h3>
+            </div>
+            <div class="card-body">
+              <p>
+                Upper Band:
+                <strong>{{ indicators.get('BB_upper', 'N/A') }}</strong>
+              </p>
+              <p>
+                Middle Band:
+                <strong>{{ indicators.get('BB_middle', 'N/A') }}</strong>
+              </p>
+              <p>
+                Lower Band:
+                <strong>{{ indicators.get('BB_lower', 'N/A') }}</strong>
+              </p>
+              <p>
+                Signal:
+                <span
+                  class="badge {% if analysis_report.indicators.Bollinger_Bands.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Bearish' %}badge-danger {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Oversold' %}badge-info {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Overbought' %}badge-warning {% else %}badge-secondary{% endif %}"
+                >
+                  {{ analysis_report.indicators.Bollinger_Bands.signal }}</span
+                >
+              </p>
+              <img
+                src="/static/{{ viz_paths.get('BB', '') }}"
+                class="img-fluid"
+                alt="Bollinger Bands Chart"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Moving Averages</h3>
+            </div>
+            <div class="card-body">
+              {% for name, value in indicators.items() %} {% if
+              name.startswith('SMA_') or name.startswith('EMA_') %}
+              <p>{{ name }}: <strong>{{ value }}</strong></p>
+              <p>
+                Signal:
+                <span
+                  class="badge {% if analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bullish' %}badge-success {% elif analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
+                >
+                  {{ analysis_report.indicators.Moving_Averages.get(name,
+                  {}).get('signal', 'N/A') }}</span
+                >
+              </p>
+              {% endif %} {% endfor %}
+              <img
+                src="/static/{{ viz_paths.get('MA', '') }}"
+                class="img-fluid"
+                alt="Moving Averages Chart"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Analysis Summary -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Technical Analysis Summary</h3>
+            </div>
+            <div class="card-body">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Indicator</th>
+                    <th>Value</th>
+                    <th>Signal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RSI</td>
+                    <td>{{ indicators.get('RSI', 'N/A') }}</td>
+                    <td>
+                      <span
+                        class="badge {% if analysis_report.indicators.RSI.signal == 'Oversold' %}badge-success {% elif analysis_report.indicators.RSI.signal == 'Overbought' %}badge-danger {% else %}badge-secondary{% endif %}"
+                      >
+                        {{ analysis_report.indicators.RSI.signal }}</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>MACD</td>
+                    <td>{{ indicators.get('MACD_line', 'N/A') }}</td>
+                    <td>
+                      <span
+                        class="badge {% if analysis_report.indicators.MACD.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.MACD.signal == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
+                      >
+                        {{ analysis_report.indicators.MACD.signal }}</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Bollinger Bands</td>
+                    <td>
+                      Price: {{ latest_price }}<br />
+                      Upper: {{ indicators.get('BB_upper', 'N/A') }}<br />
+                      Lower: {{ indicators.get('BB_lower', 'N/A') }}
+                    </td>
+                    <td>
+                      <span
+                        class="badge {% if analysis_report.indicators.Bollinger_Bands.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Bearish' %}badge-danger {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Oversold' %}badge-info {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Overbought' %}badge-warning {% else %}badge-secondary{% endif %}"
+                      >
+                        {{ analysis_report.indicators.Bollinger_Bands.signal
+                        }}</span
+                      >
+                    </td>
+                  </tr>
+                  {% for name, value in indicators.items() %} {% if
+                  name.startswith('SMA_') or name.startswith('EMA_') %}
+                  <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ value }}</td>
+                    <td>
+                      <span
+                        class="badge {% if analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bullish' %}badge-success {% elif analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
+                      >
+                        {{ analysis_report.indicators.Moving_Averages.get(name,
+                        {}).get('signal', 'N/A') }}</span
+                      >
+                    </td>
+                  </tr>
+                  {% endif %} {% endfor %}
+                  <tr class="table-primary">
+                    <td><strong>Overall</strong></td>
+                    <td>-</td>
+                    <td>
+                      <span
+                        class="badge {% if analysis_report.overall_signal == 'Bullish' %}badge-success {% elif analysis_report.overall_signal == 'Bearish' %}badge-danger {% elif analysis_report.overall_signal == 'Oversold' %}badge-info {% elif analysis_report.overall_signal == 'Overbought' %}badge-warning {% else %}badge-secondary{% endif %}"
+                      >
+                        {{ analysis_report.overall_signal }}</span
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
