@@ -1333,6 +1333,26 @@ async def get_portfolio_page(request: Request):
         )
 
 
+@app.get("/portfolio/add-holding")
+@app.post("/portfolio/add-holding")
+async def redirect_add_holding(request: Request):
+    """Redirect to portfolio page with error message"""
+    return templates.TemplateResponse(
+        "error.html",
+        {"request": request, "error_message": "You need to select a portfolio first. Please go to the Portfolio page and select a portfolio to add holdings."}
+    )
+
+
+@app.get("/portfolio/remove-holding")
+@app.post("/portfolio/remove-holding")
+async def redirect_remove_holding(request: Request):
+    """Redirect to portfolio page with error message"""
+    return templates.TemplateResponse(
+        "error.html",
+        {"request": request, "error_message": "You need to select a portfolio first. Please go to the Portfolio page and select a portfolio to remove holdings."}
+    )
+
+
 @app.post("/portfolio/create")
 async def create_portfolio(request: Request, name: str = Form(...), description: str = Form("")):
     """Create a new portfolio"""

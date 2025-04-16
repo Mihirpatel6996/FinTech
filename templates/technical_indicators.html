@@ -9,6 +9,37 @@
     <link rel="stylesheet" href="/static/style.css" />
     <!-- Load Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      .chart-container {
+        width: 100%;
+        height: 600px;
+        margin-bottom: 20px;
+      }
+
+      /* Make charts responsive */
+      @media (max-width: 768px) {
+        .chart-container {
+          height: 400px;
+        }
+      }
+
+      /* Add some spacing and styling */
+      .card {
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-header {
+        background-color: #f8f9fa;
+        font-weight: bold;
+      }
+
+      /* Make the charts stand out */
+      .chart-container .js-plotly-plot {
+        border-radius: 4px;
+        overflow: hidden;
+      }
+    </style>
   </head>
   <body>
     <div class="container mt-5">
@@ -56,127 +87,178 @@
       </div>
 
       <!-- Technical Indicators -->
+      <!-- RSI Chart -->
       <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-12">
           <div class="card">
             <div class="card-header">
               <h3 class="mb-0">RSI (Relative Strength Index)</h3>
             </div>
             <div class="card-body">
-              <p>
-                Current Value:
-                <strong>{{ indicators.get('RSI', 'N/A') }}</strong>
-              </p>
-              <p>
-                Signal:
-                <span
-                  class="badge {% if analysis_report.indicators.RSI.signal == 'Oversold' %}badge-success {% elif analysis_report.indicators.RSI.signal == 'Overbought' %}badge-danger {% else %}badge-secondary{% endif %}"
-                >
-                  {{ analysis_report.indicators.RSI.signal }}</span
-                >
-              </p>
-              {% if viz_paths.get('RSI_html') %} {{ viz_paths.RSI_html|safe }}
-              {% else %}
-              <div class="alert alert-info">RSI chart not available</div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="mb-0">MACD (Moving Average Convergence Divergence)</h3>
-            </div>
-            <div class="card-body">
-              <p>
-                MACD Line:
-                <strong>{{ indicators.get('MACD_line', 'N/A') }}</strong>
-              </p>
-              <p>
-                Signal Line:
-                <strong>{{ indicators.get('MACD_signal', 'N/A') }}</strong>
-              </p>
-              <p>
-                Histogram:
-                <strong>{{ indicators.get('MACD_histogram', 'N/A') }}</strong>
-              </p>
-              <p>
-                Signal:
-                <span
-                  class="badge {% if analysis_report.indicators.MACD.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.MACD.signal == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
-                >
-                  {{ analysis_report.indicators.MACD.signal }}</span
-                >
-              </p>
-              {% if viz_paths.get('MACD_html') %} {{ viz_paths.MACD_html|safe }}
-              {% else %}
-              <div class="alert alert-info">MACD chart not available</div>
-              {% endif %}
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <p>
+                    Current Value:
+                    <strong>{{ indicators.get('RSI', 'N/A') }}</strong>
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <p>
+                    Signal:
+                    <span
+                      class="badge {% if analysis_report.indicators.RSI.signal == 'Oversold' %}badge-success {% elif analysis_report.indicators.RSI.signal == 'Overbought' %}badge-danger {% else %}badge-secondary{% endif %}"
+                    >
+                      {{ analysis_report.indicators.RSI.signal }}</span
+                    >
+                  </p>
+                </div>
+              </div>
+              <div class="chart-container" style="width: 100%; height: 600px">
+                {% if viz_paths.get('RSI_html') %} {{ viz_paths.RSI_html|safe }}
+                {% else %}
+                <div class="alert alert-info">RSI chart not available</div>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- MACD Chart -->
       <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">MACD (Moving Average Convergence Divergence)</h3>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-md-3">
+                  <p>
+                    MACD Line:
+                    <strong>{{ indicators.get('MACD_line', 'N/A') }}</strong>
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p>
+                    Signal Line:
+                    <strong>{{ indicators.get('MACD_signal', 'N/A') }}</strong>
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p>
+                    Histogram:
+                    <strong
+                      >{{ indicators.get('MACD_histogram', 'N/A') }}</strong
+                    >
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p>
+                    Signal:
+                    <span
+                      class="badge {% if analysis_report.indicators.MACD.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.MACD.signal == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
+                    >
+                      {{ analysis_report.indicators.MACD.signal }}</span
+                    >
+                  </p>
+                </div>
+              </div>
+              <div class="chart-container" style="width: 100%; height: 600px">
+                {% if viz_paths.get('MACD_html') %} {{ viz_paths.MACD_html|safe
+                }} {% else %}
+                <div class="alert alert-info">MACD chart not available</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bollinger Bands Chart -->
+      <div class="row mb-4">
+        <div class="col-12">
           <div class="card">
             <div class="card-header">
               <h3 class="mb-0">Bollinger Bands</h3>
             </div>
             <div class="card-body">
-              <p>
-                Upper Band:
-                <strong>{{ indicators.get('BB_upper', 'N/A') }}</strong>
-              </p>
-              <p>
-                Middle Band:
-                <strong>{{ indicators.get('BB_middle', 'N/A') }}</strong>
-              </p>
-              <p>
-                Lower Band:
-                <strong>{{ indicators.get('BB_lower', 'N/A') }}</strong>
-              </p>
-              <p>
-                Signal:
-                <span
-                  class="badge {% if analysis_report.indicators.Bollinger_Bands.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Bearish' %}badge-danger {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Oversold' %}badge-info {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Overbought' %}badge-warning {% else %}badge-secondary{% endif %}"
-                >
-                  {{ analysis_report.indicators.Bollinger_Bands.signal }}</span
-                >
-              </p>
-              {% if viz_paths.get('BB_html') %} {{ viz_paths.BB_html|safe }} {%
-              else %}
-              <div class="alert alert-info">
-                Bollinger Bands chart not available
+              <div class="row mb-3">
+                <div class="col-md-3">
+                  <p>
+                    Upper Band:
+                    <strong>{{ indicators.get('BB_upper', 'N/A') }}</strong>
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p>
+                    Middle Band:
+                    <strong>{{ indicators.get('BB_middle', 'N/A') }}</strong>
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p>
+                    Lower Band:
+                    <strong>{{ indicators.get('BB_lower', 'N/A') }}</strong>
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p>
+                    Signal:
+                    <span
+                      class="badge {% if analysis_report.indicators.Bollinger_Bands.signal == 'Bullish' %}badge-success {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Bearish' %}badge-danger {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Oversold' %}badge-info {% elif analysis_report.indicators.Bollinger_Bands.signal == 'Overbought' %}badge-warning {% else %}badge-secondary{% endif %}"
+                    >
+                      {{ analysis_report.indicators.Bollinger_Bands.signal
+                      }}</span
+                    >
+                  </p>
+                </div>
               </div>
-              {% endif %}
+              <div class="chart-container" style="width: 100%; height: 600px">
+                {% if viz_paths.get('BB_html') %} {{ viz_paths.BB_html|safe }}
+                {% else %}
+                <div class="alert alert-info">
+                  Bollinger Bands chart not available
+                </div>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
+      </div>
+
+      <!-- Moving Averages Chart -->
+      <div class="row mb-4">
+        <div class="col-12">
           <div class="card">
             <div class="card-header">
               <h3 class="mb-0">Moving Averages</h3>
             </div>
             <div class="card-body">
-              {% for name, value in indicators.items() %} {% if
-              name.startswith('SMA_') or name.startswith('EMA_') %}
-              <p>{{ name }}: <strong>{{ value }}</strong></p>
-              <p>
-                Signal:
-                <span
-                  class="badge {% if analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bullish' %}badge-success {% elif analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
-                >
-                  {{ analysis_report.indicators.Moving_Averages.get(name,
-                  {}).get('signal', 'N/A') }}</span
-                >
-              </p>
-              {% endif %} {% endfor %} {% if viz_paths.get('MA_html') %} {{
-              viz_paths.MA_html|safe }} {% else %}
-              <div class="alert alert-info">
-                Moving Averages chart not available
+              <div class="row mb-3">
+                {% for name, value in indicators.items() %} {% if
+                name.startswith('SMA_') or name.startswith('EMA_') %}
+                <div class="col-md-4 mb-2">
+                  <p>
+                    {{ name }}: <strong>{{ value }}</strong>
+                    <span
+                      class="badge {% if analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bullish' %}badge-success {% elif analysis_report.indicators.Moving_Averages.get(name, {}).get('signal') == 'Bearish' %}badge-danger {% else %}badge-secondary{% endif %}"
+                    >
+                      {{ analysis_report.indicators.Moving_Averages.get(name,
+                      {}).get('signal', 'N/A') }}</span
+                    >
+                  </p>
+                </div>
+                {% endif %} {% endfor %}
               </div>
-              {% endif %}
+              <div class="chart-container" style="width: 100%; height: 600px">
+                {% if viz_paths.get('MA_html') %} {{ viz_paths.MA_html|safe }}
+                {% else %}
+                <div class="alert alert-info">
+                  Moving Averages chart not available
+                </div>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
