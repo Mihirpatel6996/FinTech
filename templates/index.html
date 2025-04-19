@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>StockSense - Smart Stock Analysis</title>
+    <title>
+      FINTECH - Personalized Investment Advisory and Risk Management Platform
+    </title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
@@ -14,69 +16,26 @@
       rel="stylesheet"
       href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/static/style.css" />
-    <style>
-      body {
-        background-color: #f8f9fa;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-      .navbar {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .jumbotron {
-        background: linear-gradient(135deg, #007bff, #6610f2);
-        color: white;
-        border-radius: 0;
-        padding: 4rem 2rem;
-        margin-bottom: 2rem;
-      }
-      .card {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s;
-      }
-      .card:hover {
-        transform: translateY(-5px);
-      }
-      .search-container {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-      .btn-view {
-        background-color: #007bff;
-        color: white;
-        border-radius: 20px;
-        padding: 5px 15px;
-        transition: all 0.3s;
-      }
-      .btn-view:hover {
-        background-color: #0069d9;
-        transform: scale(1.05);
-        color: white;
-      }
-      .footer {
-        background-color: #343a40;
-        color: white;
-        padding: 2rem 0;
-        margin-top: 3rem;
-      }
-      .table-container {
-        background-color: white;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
   </head>
   <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
         <a class="navbar-brand" href="/"
-          ><i class="fas fa-chart-line mr-2"></i>StockSense</a
+          ><i class="fas fa-chart-line mr-2"></i>FINTECH</a
         >
         <button
           class="navbar-toggler"
@@ -89,16 +48,28 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="/">Home</a>
+              <a class="nav-link" href="/"
+                ><i class="fas fa-home mr-1"></i> Home</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/portfolio">Portfolio</a>
+              <a class="nav-link" href="/portfolio"
+                ><i class="fas fa-briefcase mr-1"></i> Portfolio</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/education">Education</a>
+              <a class="nav-link" href="/education"
+                ><i class="fas fa-graduation-cap mr-1"></i> Education</a
+              >
             </li>
           </ul>
-          <!-- Login/Register links removed -->
+          <div class="d-flex align-items-center">
+            <div
+              class="theme-toggle mr-3"
+              id="themeToggle"
+              title="Toggle Dark/Light Mode"
+            ></div>
+          </div>
         </div>
       </div>
     </nav>
@@ -106,17 +77,31 @@
     <!-- Hero Section -->
     <div class="jumbotron text-center">
       <div class="container">
-        <h1 class="display-4">Smart Stock Analysis & Prediction</h1>
-        <p class="lead">
-          Find, analyze, and track stocks with advanced AI-powered tools
+        <h1 class="display-4 animate__animated animate__fadeInDown">FINTECH</h1>
+        <p class="lead animate__animated animate__fadeInUp animate__delay-1s">
+          Personalized Investment Advisory and Risk Management Platform
         </p>
+        <hr class="my-4" />
+        <p class="animate__animated animate__fadeInUp animate__delay-2s">
+          Combining advanced AI algorithms, real-time market data, and
+          personalized risk analysis to help you make smarter investment
+          decisions.
+        </p>
+        <div class="mt-4 animate__animated animate__fadeInUp animate__delay-3s">
+          <a href="#search-section" class="btn btn-primary btn-lg mr-2">
+            <i class="fas fa-search mr-1"></i> Find Stocks
+          </a>
+          <a href="/portfolio" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-briefcase mr-1"></i> Manage Portfolio
+          </a>
+        </div>
       </div>
     </div>
 
     <div class="container">
       <!-- Search Section -->
-      <div class="row justify-content-center mb-5">
-        <div class="col-md-8">
+      <div class="row justify-content-center mb-5" id="search-section">
+        <div class="col-md-8 fade-in">
           <div class="search-container">
             <h3 class="text-center mb-4">
               <i class="fas fa-search mr-2"></i>Find Stocks
@@ -129,6 +114,10 @@
                   name="search"
                   placeholder="Search by ticker or company name..."
                   value="{{ search }}"
+                  autocomplete="off"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Enter a stock symbol (e.g., AAPL) or company name"
                 />
                 <div class="input-group-append">
                   <button class="btn btn-primary" type="submit">
@@ -142,6 +131,10 @@
                 </div>
               </div>
             </form>
+            <p class="text-center text-muted small">
+              <i class="fas fa-info-circle mr-1"></i> Search our database of
+              over 8,000 stocks from major exchanges
+            </p>
           </div>
         </div>
       </div>
@@ -153,7 +146,7 @@
       <!-- Stock Table Section -->
       {% if stocks %}
       <div class="row">
-        <div class="col-12">
+        <div class="col-12 fade-in">
           <div class="table-container mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h3><i class="fas fa-table mr-2"></i>Stock Listings</h3>
@@ -165,12 +158,12 @@
               <table id="stockTable" class="table table-striped table-hover">
                 <thead class="thead-dark">
                   <tr>
-                    <th>Ticker</th>
-                    <th>Company Name</th>
-                    <th>Exchange</th>
-                    <th>Category</th>
-                    <th>Country</th>
-                    <th>Actions</th>
+                    <th><i class="fas fa-hashtag mr-1"></i>Ticker</th>
+                    <th><i class="fas fa-building mr-1"></i>Company Name</th>
+                    <th><i class="fas fa-exchange-alt mr-1"></i>Exchange</th>
+                    <th><i class="fas fa-tag mr-1"></i>Category</th>
+                    <th><i class="fas fa-globe-americas mr-1"></i>Country</th>
+                    <th><i class="fas fa-cogs mr-1"></i>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -178,12 +171,24 @@
                   <tr>
                     <td><strong>{{ stock.Ticker }}</strong></td>
                     <td>{{ stock.Name }}</td>
-                    <td>{{ stock.Exchange }}</td>
-                    <td>{{ stock['Category Name'] }}</td>
+                    <td>
+                      <span class="badge badge-info">{{ stock.Exchange }}</span>
+                    </td>
+                    <td>
+                      <span class="badge badge-secondary"
+                        >{{ stock['Category Name'] }}</span
+                      >
+                    </td>
                     <td>{{ stock.Country }}</td>
                     <td>
-                      <a href="/stock/{{ stock.Ticker }}" class="btn btn-view">
-                        <i class="fas fa-chart-bar mr-1"></i> View
+                      <a
+                        href="/stock/{{ stock.Ticker }}"
+                        class="btn btn-primary btn-sm"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="View detailed analysis for {{ stock.Ticker }}"
+                      >
+                        <i class="fas fa-chart-line mr-1"></i>Analyze
                       </a>
                     </td>
                   </tr>
@@ -576,6 +581,77 @@
       {% endif %}
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4 mb-4 mb-md-0">
+            <h5>FINTECH</h5>
+            <p>Personalized Investment Advisory and Risk Management Platform</p>
+            <p class="mb-0">
+              <i class="fas fa-envelope mr-2"></i> contact@fintech.com<br />
+              <i class="fas fa-phone mr-2"></i> +1 (555) 123-4567
+            </p>
+          </div>
+          <div class="col-md-2 mb-4 mb-md-0">
+            <h5>Links</h5>
+            <ul class="list-unstyled">
+              <li>
+                <a href="/"><i class="fas fa-home mr-1"></i> Home</a>
+              </li>
+              <li>
+                <a href="/portfolio"
+                  ><i class="fas fa-briefcase mr-1"></i> Portfolio</a
+                >
+              </li>
+              <li>
+                <a href="/education"
+                  ><i class="fas fa-graduation-cap mr-1"></i> Education</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-3 mb-4 mb-md-0">
+            <h5>Features</h5>
+            <ul class="list-unstyled">
+              <li><i class="fas fa-chart-line mr-1"></i> Stock Predictions</li>
+              <li><i class="fas fa-chart-bar mr-1"></i> Technical Analysis</li>
+              <li><i class="fas fa-robot mr-1"></i> AI Assistant</li>
+              <li>
+                <i class="fas fa-exclamation-triangle mr-1"></i> Risk Analysis
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-3">
+            <h5>Legal</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Disclaimer</a></li>
+            </ul>
+            <p class="mt-3 small">
+              Not financial advice. For educational purposes only.
+            </p>
+          </div>
+        </div>
+        <hr
+          class="mt-4 mb-3"
+          style="background-color: rgba(255, 255, 255, 0.1)"
+        />
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-0 small">© 2023 FINTECH. All rights reserved.</p>
+          </div>
+          <div class="col-md-6 text-md-right">
+            <a href="#" class="mr-3"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="mr-3"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="mr-3"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -584,6 +660,7 @@
 
     <script>
       $(document).ready(function () {
+        // Initialize DataTable
         $("#stockTable").DataTable({
           pageLength: 25,
           lengthMenu: [
@@ -593,6 +670,37 @@
           order: [[0, "asc"]],
           columnDefs: [{ orderable: false, targets: 5 }],
         });
+
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Theme toggle functionality
+        $("#themeToggle").click(function () {
+          $("body").toggleClass("dark-theme");
+          localStorage.setItem("darkTheme", $("body").hasClass("dark-theme"));
+        });
+
+        // Check for saved theme preference
+        if (localStorage.getItem("darkTheme") === "true") {
+          $("body").addClass("dark-theme");
+        }
+
+        // Add animation classes on scroll
+        $(window).scroll(function () {
+          $(".fade-in:not(.animate__animated)").each(function () {
+            var elementTop = $(this).offset().top;
+            var elementVisible = 150;
+            var windowHeight = $(window).height();
+            var scrollPos = $(window).scrollTop();
+
+            if (elementTop < scrollPos + windowHeight - elementVisible) {
+              $(this).addClass("animate__animated animate__fadeIn");
+            }
+          });
+        });
+
+        // Trigger scroll once to check for elements in view on page load
+        $(window).trigger("scroll");
       });
     </script>
   </body>

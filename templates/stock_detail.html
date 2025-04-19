@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>{{ symbol }} - StockSense Analysis</title>
+    <title>{{ symbol }} - FINTECH Analysis</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
@@ -10,72 +10,137 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/static/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <style>
-      body {
-        background-color: #f8f9fa;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      /* Additional styles specific to stock detail page */
+      .financial-term {
+        text-decoration: underline dotted;
+        cursor: help;
       }
-      .navbar {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
+
       .stock-header {
-        background: linear-gradient(135deg, #007bff, #6610f2);
+        background: var(--accent-gradient);
         color: white;
         padding: 2rem 0;
         margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
       }
-      .card {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s;
-        margin-bottom: 20px;
+      .stock-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("/static/chart-pattern.png");
+        background-size: cover;
+        background-position: center;
+        opacity: 0.1;
+        z-index: 0;
       }
-      .card:hover {
-        transform: translateY(-5px);
+
+      .stock-header .container {
+        position: relative;
+        z-index: 1;
       }
+
+      .stock-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        animation: fadeIn 0.8s ease-in-out;
+      }
+
+      .price-change {
+        font-size: 1.2rem;
+        font-weight: 500;
+        animation: fadeIn 0.8s ease-in-out 0.2s forwards;
+        opacity: 0;
+      }
+
+      .price-up {
+        color: var(--success);
+      }
+
+      .price-down {
+        color: var(--danger);
+      }
+
       .nav-tabs .nav-link {
         border-radius: 8px 8px 0 0;
         font-weight: 500;
+        transition: all 0.3s ease;
       }
+
+      .nav-tabs .nav-link:hover {
+        transform: translateY(-2px);
+      }
+
       .nav-tabs .nav-link.active {
-        background-color: #fff;
-        border-color: #dee2e6 #dee2e6 #fff;
+        background-color: var(--card-bg);
+        border-color: var(--border) var(--border) var(--card-bg);
+        color: var(--accent);
       }
+
       .tab-content {
-        background-color: white;
-        border: 1px solid #dee2e6;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
         border-top: none;
         border-radius: 0 0 8px 8px;
         padding: 20px;
       }
-      .btn-action {
-        border-radius: 20px;
-        padding: 8px 20px;
-        transition: all 0.3s;
-      }
-      .btn-action:hover {
-        transform: scale(1.05);
-      }
-      .footer {
-        background-color: #343a40;
+
+      /* Card styles for stock detail */
+      .prediction-card .card-header {
+        background: linear-gradient(135deg, #007bff, #00c6ff);
         color: white;
-        padding: 2rem 0;
-        margin-top: 3rem;
       }
-      .stock-price {
-        font-size: 2.5rem;
-        font-weight: bold;
+
+      .sentiment-card .card-header {
+        background: linear-gradient(135deg, #28a745, #00c6ff);
+        color: white;
       }
-      .price-change {
-        font-size: 1.2rem;
+
+      .technical-card .card-header {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+        color: white;
       }
-      .price-up {
-        color: #28a745;
+
+      .risk-card .card-header {
+        background: linear-gradient(135deg, #dc3545, #ff9800);
+        color: white;
       }
-      .price-down {
-        color: #dc3545;
+
+      .add-portfolio-card {
+        border-left: 5px solid #6f42c1;
+      }
+
+      /* Tab animations */
+      .tab-pane.fade {
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       .stock-stats {
         background-color: white;
@@ -198,7 +263,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
         <a class="navbar-brand" href="/"
-          ><i class="fas fa-chart-line mr-2"></i>StockSense</a
+          ><i class="fas fa-chart-line mr-2"></i>FINTECH</a
         >
         <button
           class="navbar-toggler"
@@ -211,16 +276,28 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-              <a class="nav-link" href="/">Home</a>
+              <a class="nav-link" href="/"
+                ><i class="fas fa-home mr-1"></i> Home</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/portfolio">Portfolio</a>
+              <a class="nav-link" href="/portfolio"
+                ><i class="fas fa-briefcase mr-1"></i> Portfolio</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/education">Education</a>
+              <a class="nav-link" href="/education"
+                ><i class="fas fa-graduation-cap mr-1"></i> Education</a
+              >
             </li>
           </ul>
-          <!-- Login/Register links removed -->
+          <div class="d-flex align-items-center">
+            <div
+              class="theme-toggle mr-3"
+              id="themeToggle"
+              title="Toggle Dark/Light Mode"
+            ></div>
+          </div>
         </div>
       </div>
     </nav>
@@ -229,12 +306,27 @@
     <div class="stock-header">
       <div class="container">
         <div class="row align-items-center">
-          <div class="col-md-6">
+          <div class="col-md-6 animate__animated animate__fadeInLeft">
             <h1 class="display-4">{{ symbol }}</h1>
             <h2>{{ company_name }}</h2>
-            <p class="lead">{{ exchange }} • {{ category }}</p>
+            <p class="lead">
+              <span
+                class="badge badge-info mr-2"
+                data-toggle="tooltip"
+                title="Stock exchange where this security is traded"
+                >{{ exchange }}</span
+              >
+              <span
+                class="badge badge-secondary"
+                data-toggle="tooltip"
+                title="Industry category"
+                >{{ category }}</span
+              >
+            </p>
           </div>
-          <div class="col-md-6 text-right">
+          <div
+            class="col-md-6 text-right animate__animated animate__fadeInRight"
+          >
             <div class="stock-price">${{ latest_price }}</div>
             <div
               class="price-change {% if price_change >= 0 %}price-up{% else %}price-down{% endif %}"
@@ -256,32 +348,62 @@
       <!-- Quick Stats -->
       <div class="row mb-4">
         <div class="col-md-12">
-          <div class="stock-stats">
+          <div class="stock-stats fade-in">
             <div class="row">
               <div class="col-md-2 col-6 text-center">
-                <div class="h6 text-muted">Open</div>
-                <div class="h4">${{ open_price }}</div>
+                <div class="h6 text-muted">
+                  <i class="fas fa-door-open mr-1"></i> Open
+                </div>
+                <div class="h4 text-primary">${{ open_price }}</div>
               </div>
               <div class="col-md-2 col-6 text-center">
-                <div class="h6 text-muted">High</div>
-                <div class="h4">${{ high_price }}</div>
+                <div class="h6 text-muted">
+                  <i class="fas fa-arrow-up mr-1"></i> High
+                </div>
+                <div class="h4 text-success">${{ high_price }}</div>
               </div>
               <div class="col-md-2 col-6 text-center">
-                <div class="h6 text-muted">Low</div>
-                <div class="h4">${{ low_price }}</div>
+                <div class="h6 text-muted">
+                  <i class="fas fa-arrow-down mr-1"></i> Low
+                </div>
+                <div class="h4 text-danger">${{ low_price }}</div>
               </div>
               <div class="col-md-2 col-6 text-center">
-                <div class="h6 text-muted">Volume</div>
-                <div class="h4">{{ volume }}</div>
+                <div class="h6 text-muted">
+                  <i class="fas fa-chart-bar mr-1"></i> Volume
+                </div>
+                <div class="h4 text-info">{{ volume }}</div>
               </div>
               <div class="col-md-2 col-6 text-center">
-                <div class="h6 text-muted">52W High</div>
-                <div class="h4">${{ year_high }}</div>
+                <div class="h6 text-muted">
+                  <i class="fas fa-calendar-alt mr-1"></i> 52W High
+                </div>
+                <div class="h4 text-success">${{ year_high }}</div>
               </div>
               <div class="col-md-2 col-6 text-center">
-                <div class="h6 text-muted">52W Low</div>
-                <div class="h4">${{ year_low }}</div>
+                <div class="h6 text-muted">
+                  <i class="fas fa-calendar-alt mr-1"></i> 52W Low
+                </div>
+                <div class="h4 text-danger">${{ year_low }}</div>
               </div>
+            </div>
+            <div class="text-center mt-3">
+              <a
+                href="https://finance.yahoo.com/quote/{{ symbol }}"
+                target="_blank"
+                class="btn btn-light btn-sm mr-2"
+                data-toggle="tooltip"
+                title="View on Yahoo Finance"
+              >
+                <i class="fas fa-external-link-alt mr-1"></i> Yahoo Finance
+              </a>
+              <button
+                class="btn btn-primary btn-sm"
+                data-toggle="modal"
+                data-target="#addToPortfolioModal"
+              >
+                <i class="fas fa-plus-circle mr-1"></i> Add to Portfolio
+              </button>
             </div>
           </div>
         </div>
@@ -875,33 +997,72 @@
     </div>
 
     <!-- Footer -->
+    <!-- Footer -->
     <footer class="footer">
       <div class="container">
         <div class="row">
-          <div class="col-md-4">
-            <h5><i class="fas fa-chart-line mr-2"></i>StockSense</h5>
-            <p>
-              Advanced stock analysis and prediction platform powered by AI and
-              machine learning.
+          <div class="col-md-4 mb-4 mb-md-0">
+            <h5>FINTECH</h5>
+            <p>Personalized Investment Advisory and Risk Management Platform</p>
+            <p class="mb-0">
+              <i class="fas fa-envelope mr-2"></i> contact@fintech.com<br />
+              <i class="fas fa-phone mr-2"></i> +1 (555) 123-4567
             </p>
           </div>
-          <div class="col-md-4">
-            <h5>Quick Links</h5>
+          <div class="col-md-2 mb-4 mb-md-0">
+            <h5>Links</h5>
             <ul class="list-unstyled">
-              <li><a href="/" class="text-light">Home</a></li>
-              <li><a href="/portfolio" class="text-light">Portfolio</a></li>
-              <li><a href="/education" class="text-light">Education</a></li>
+              <li>
+                <a href="/"><i class="fas fa-home mr-1"></i> Home</a>
+              </li>
+              <li>
+                <a href="/portfolio"
+                  ><i class="fas fa-briefcase mr-1"></i> Portfolio</a
+                >
+              </li>
+              <li>
+                <a href="/education"
+                  ><i class="fas fa-graduation-cap mr-1"></i> Education</a
+                >
+              </li>
             </ul>
           </div>
-          <div class="col-md-4">
-            <h5>Contact</h5>
-            <p><i class="fas fa-envelope mr-2"></i>support@stocksense.com</p>
-            <p><i class="fas fa-phone mr-2"></i>(123) 456-7890</p>
+          <div class="col-md-3 mb-4 mb-md-0">
+            <h5>Features</h5>
+            <ul class="list-unstyled">
+              <li><i class="fas fa-chart-line mr-1"></i> Stock Predictions</li>
+              <li><i class="fas fa-chart-bar mr-1"></i> Technical Analysis</li>
+              <li><i class="fas fa-robot mr-1"></i> AI Assistant</li>
+              <li>
+                <i class="fas fa-exclamation-triangle mr-1"></i> Risk Analysis
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-3">
+            <h5>Legal</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Disclaimer</a></li>
+            </ul>
+            <p class="mt-3 small">
+              Not financial advice. For educational purposes only.
+            </p>
           </div>
         </div>
-        <div class="row mt-3">
-          <div class="col-12 text-center">
-            <p class="mb-0">© 2023 StockSense. All rights reserved.</p>
+        <hr
+          class="mt-4 mb-3"
+          style="background-color: rgba(255, 255, 255, 0.1)"
+        />
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-0 small">© 2023 FINTECH. All rights reserved.</p>
+          </div>
+          <div class="col-md-6 text-md-right">
+            <a href="#" class="mr-3"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="mr-3"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="mr-3"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
           </div>
         </div>
       </div>
@@ -910,6 +1071,42 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Theme Toggle Script -->
+    <script>
+      $(document).ready(function () {
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Theme toggle functionality
+        $("#themeToggle").click(function () {
+          $("body").toggleClass("dark-theme");
+          localStorage.setItem("darkTheme", $("body").hasClass("dark-theme"));
+        });
+
+        // Check for saved theme preference
+        if (localStorage.getItem("darkTheme") === "true") {
+          $("body").addClass("dark-theme");
+        }
+
+        // Add animation classes on scroll
+        $(window).scroll(function () {
+          $(".fade-in:not(.animate__animated)").each(function () {
+            var elementTop = $(this).offset().top;
+            var elementVisible = 150;
+            var windowHeight = $(window).height();
+            var scrollPos = $(window).scrollTop();
+
+            if (elementTop < scrollPos + windowHeight - elementVisible) {
+              $(this).addClass("animate__animated animate__fadeIn");
+            }
+          });
+        });
+
+        // Trigger scroll once to check for elements in view on page load
+        $(window).trigger("scroll");
+      });
+    </script>
 
     <!-- Chatbot Script -->
     <script>

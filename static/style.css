@@ -1,292 +1,708 @@
 
-/* Global CSS Document */
-/*
-/*
-* Theme Name: GoldCoin - bitcoin cryptocurrency HTML Template
-* File name: style.css
-* Description: GoldCoin - bitcoin cryptocurrency HTML Template
-* Version: 1.0
+/* FINTECH - Personalized Investment Advisory and Risk Management Platform
+   Main Stylesheet */
 
+:root {
+  /* Light Theme Variables */
+  --light-bg: #f8f9fa;
+  --light-text: #212529;
+  --light-card-bg: #ffffff;
+  --light-accent: #007bff;
+  --light-accent-gradient: linear-gradient(135deg, #007bff, #6610f2);
+  --light-secondary: #6c757d;
+  --light-success: #28a745;
+  --light-danger: #dc3545;
+  --light-warning: #ffc107;
+  --light-info: #17a2b8;
+  --light-border: #e9ecef;
+  --light-shadow: rgba(0, 0, 0, 0.1);
+  --light-navbar: #343a40;
+  --light-footer: #343a40;
 
-/* Constractor One Construction and Home Renovation HTML5 Template */
-/************ TABLE OF CONTENTS ***************
- 
-01.General & Basic Styles 
-02.BG Color 
-03.BTN 
-04.Particles
- 05.Image
-06.Full wirth Video 
-07.Demo Heading 
-08.Banner text
-09. Side Tab
-10. Special Features
-11. Features Services ii
- 12.Awesome Features
-13.Newsletter
-14.Benefit 
-15.Navigation
- 16.Content right left
- 17.Section 
-18. Feature Services iii
-19. feature
-20.About Us 
-21.Portfolio 
-22.Tabile price 
-23. Shop product
-24 Events 
-25 About Coin 
-26 Investor
-27. Achivements 
-28.Faq Tab
-29.Special Features
-30.Superb Benifit
-31.Contact Us
-32.Blog 
-33.Team Box 
-34. Owl Slide
-35.Footer 
-36.Preloader
-37. Back to top
-38.work
-39. Login Page
-40.Contact Us
-41.Contact pop
-42.Error
- 
-  
+  /* Dark Theme Variables */
+  --dark-bg: #121212;
+  --dark-text: #f8f9fa;
+  --dark-card-bg: #1e1e1e;
+  --dark-accent: #0d6efd;
+  --dark-accent-gradient: linear-gradient(135deg, #0d6efd, #6610f2);
+  --dark-secondary: #adb5bd;
+  --dark-success: #198754;
+  --dark-danger: #dc3545;
+  --dark-warning: #ffc107;
+  --dark-info: #0dcaf0;
+  --dark-border: #2d2d2d;
+  --dark-shadow: rgba(0, 0, 0, 0.5);
+  --dark-navbar: #1e1e1e;
+  --dark-footer: #1e1e1e;
 
-
-/*------------------------------------------*/
-/* 
-/* 01.General & Basic Styles 
-/* 
-/*------------------------------------------*/
-
- @import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800);
- @import url(http://fonts.googleapis.com/css?family=Raleway:300,900,100,600,400,500,800);
- @import url(https://fonts.googleapis.com/css?family=Abril+Fatface|Bungee+Inline|Fredericka+the+Great|Limelight|Lobster|Monoton);
-body {
-	font-family: 'Open+Sans', sans-serif;
-	text-rendering: optimizeLegibility !important;
-	-webkit-font-smoothing: antialiased !important;
-	width: 100% !important;
-	height: 100% !important;
-	font-size: 16px;
-	color: #333;
-	line-height: 30px;
-	margin: 0px;
-	padding: 0px;
+  /* Default to light theme */
+  --bg: var(--light-bg);
+  --text: var(--light-text);
+  --card-bg: var(--light-card-bg);
+  --accent: var(--light-accent);
+  --accent-gradient: var(--light-accent-gradient);
+  --secondary: var(--light-secondary);
+  --success: var(--light-success);
+  --danger: var(--light-danger);
+  --warning: var(--light-warning);
+  --info: var(--light-info);
+  --border: var(--light-border);
+  --shadow: var(--light-shadow);
+  --navbar: var(--light-navbar);
+  --footer: var(--light-footer);
 }
-#canvas {
-	background: #000;
-	margin: 0;
-	padding: 0;
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600&display=swap');
+
+/* Dark Theme Class */
+body.dark-theme {
+  --bg: var(--dark-bg);
+  --text: var(--dark-text);
+  --card-bg: var(--dark-card-bg);
+  --accent: var(--dark-accent);
+  --accent-gradient: var(--dark-accent-gradient);
+  --secondary: var(--dark-secondary);
+  --success: var(--dark-success);
+  --danger: var(--dark-danger);
+  --warning: var(--dark-warning);
+  --info: var(--dark-info);
+  --border: var(--dark-border);
+  --shadow: var(--dark-shadow);
+  --navbar: var(--dark-navbar);
+  --footer: var(--dark-footer);
+}
+
+/* Base Styles */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Open Sans', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+  width: 100% !important;
+  height: 100% !important;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0px;
+  padding: 0px;
 }
 h1, h2, h3, h4, h5, h6 {
-	color: #333333;
-	font-family: 'Raleway', sans-serif;
-	font-weight: 500;
-	text-transform: uppercase;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1rem;
 }
-a {
-	color: #fff;
-}
-a:hover, a:focus {
-	text-decoration: none;
-	outline: none;
-}
-a:focus {
-	color: #fff;
-}
-ul, ol {
-	list-style: none;
-}
-.clearfix:after {
-	visibility: hidden;
-	display: block;
-	font-size: 0;
-	clear: both;
-	height: 0;
-}
-.no-pad {
-	padding:0px;
-}
-.clearfix {
-	display: inline-block;
-}
-.clearfix {
-	display: block;
-}
-ul, ol {
-	padding: 0;
-	webkit-padding: 0;
-	moz-padding: 0;
-}
-clients-name .radius {
-	border-radius: 50%;
-}
-img {
-	max-width: 100%;
-	height: auto;
-}
-#faq {
-	padding: 80px 0 0 0;
-}
-.text-center {
-	text-align:center;
-}
-/*------------------------------------------*/
-/* 
-/* 02.BG Color 
-/* 
-/*------------------------------------------*/
- .light-bg {
-	background: #f7f7f7;
-}
-.light-gray {
-	color: #333;
-}
-.white {
-	color: #ffffff;
-	letter-spacing:1px;
-	font-size:13px;
-}
-.yellow {
-	color: #ffaa00;
-	text-transform: uppercase;
-}
-.yellow-back {
-	background-color:#ffaa00;
-	color:#000;
-	padding:10px 0 10px 0;
-	text-align:center;
-}
-.black-back {
-	background-color:#eee;
-	color:#000;
-	padding:10px 0 10px 0;
-	text-align:center;
-}
-.black-gray {
-	background-color:#333;
-	color:#fff;
-	padding:10px 0 10px 0;
-	text-align:center;
-}
-.yellow-back a {
-	background-color:#ffaa00;
-	color:#000;
-	padding:10px 0 10px 0;
-}
-.black-back a {
-	background-color:#eee;
-	color:#000;
-	padding:10px 0 10px 0;
-}
-.black-gray a {
-	background-color:#333;
-	color:#fff;
-	padding:10px 0 10px 0;
-}
-.black {
-	color: #333 !important;
-	letter-spacing: 1px;
-	font-size: 16px;
-}
-.black-small {
-	color: #000;
-	font-size: 15px;
-	line-height: 32px;
-}
-.dark {
-	color: #f1f1f1;
-}
-.interface-img {
-	text-align: center;
-}
-.centered {
-	margin: 0 auto;
-}
-/*------------------------------------------*/
-/* 
-/* 03.BTN */
 
-/*------------------------------------------*/
- .btn-s-black {
-	text-transform: uppercase;
-	text-decoration: none;
-	border-radius: 0px;
-	color: #fff;
-	font-size: 13px;
-	padding: 5px 18px;
-	transition: all 0.5s ease 0s;
-	background-color: #333;
-	letter-spacing: 1px;
-	font-weight:600;
-	border:none;
+h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
 }
-.btn-s-black:hover {
-	background-color:#000;
-	color: #fff;
-	text-decoration: none;
- animation:.3s ease 0s normal forwards 1 running anim-moema-1 !important
+
+h2 {
+  font-size: 2rem;
+  line-height: 1.3;
 }
-.btn-small {
-	text-transform: uppercase;
-	text-decoration: none;
-	border-radius: 0px;
-	color: #000;
-	font-size: 13px;
-	padding: 10px 18px;
-	transition: all 0.5s ease 0s;
-	background: #ffaa00;
-	letter-spacing: 1px;
-	font-weight:600;
-	border:none;
+
+h3 {
+  font-size: 1.75rem;
+  line-height: 1.4;
 }
-.btn-small:hover {
-	background: #333333;
-	color: #ffffff;
-	text-decoration: none;
- animation:.3s ease 0s normal forwards 1 running anim-moema-1 !important
+
+h4 {
+  font-size: 1.5rem;
+  line-height: 1.4;
 }
-.btn-l {
-	text-transform: uppercase;
-	text-decoration: none;
-	border-radius: 0px;
-	color: #000;
-	font-size: 12px;
-	padding:12px 18px;
-	transition: all 0.5s ease 0s;
-	background: #ffaa00;
-	letter-spacing: 1px;
-	font-weight:600;
-	border:none;
+
+h5 {
+  font-size: 1.25rem;
+  line-height: 1.4;
 }
-.btn-l:hover {
-	background: #333333;
-	color: #ffffff;
-	text-decoration: none;
- animation:.3s ease 0s normal forwards 1 running anim-moema-1 !important
+
+h6 {
+  font-size: 1rem;
+  line-height: 1.4;
 }
-.btn-style-white {
-	position: relative;
-	display: inline-block;
-	line-height: 24px;
-	padding: 6px 25px;
-	font-size: 13px;
-	font-weight: 700;
-	text-transform: uppercase;
-	background: #fff;
-	color: #333 !important;
-	border-top: 1px dashed #fff;
+
+a {
+  color: var(--accent);
+  transition: color 0.3s ease;
+  text-decoration: none;
 }
-.btn-style-white:hover {
-	background: #333;
-	color: #fff !important;
-	border-color: #000;
-	border-top: 1px dashed #fff;
+
+a:hover, a:focus {
+  color: var(--accent);
+  text-decoration: none;
+  outline: none;
+}
+
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.clearfix:after {
+  visibility: hidden;
+  display: block;
+  font-size: 0;
+  content: " ";
+  clear: both;
+  height: 0;
+}
+
+.no-pad {
+  padding: 0px;
+}
+/* Navbar Styles */
+.navbar {
+  background-color: var(--navbar) !important;
+  box-shadow: 0 2px 10px var(--shadow);
+  transition: background-color 0.3s ease;
+  padding: 1rem 0;
+}
+
+.navbar-brand {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+  color: #ffffff;
+}
+
+.navbar-dark .navbar-nav .nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover::after,
+.navbar-dark .navbar-nav .nav-link.active::after {
+  width: 100%;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  width: 50px;
+  height: 25px;
+  background-color: var(--secondary);
+  border-radius: 25px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle::before {
+  content: '';
+  position: absolute;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease;
+}
+
+.dark-theme .theme-toggle {
+  background-color: var(--accent);
+}
+
+.dark-theme .theme-toggle::before {
+  transform: translateX(25px);
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--card-bg);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px var(--shadow);
+}
+
+.card-header {
+  background: var(--accent-gradient);
+  color: white;
+  border-radius: 10px 10px 0 0 !important;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  border: none;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Button Styles */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background: var(--accent-gradient);
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  border: none;
+}
+
+.btn-success {
+  background-color: var(--success);
+  border: none;
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  border: none;
+}
+
+.btn-warning {
+  background-color: var(--warning);
+  border: none;
+  color: #212529;
+}
+
+.btn-info {
+  background-color: var(--info);
+  border: none;
+}
+/* Jumbotron Styles */
+.jumbotron {
+  background: var(--accent-gradient);
+  color: white;
+  border-radius: 0;
+  padding: 4rem 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.jumbotron::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/static/finance-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.jumbotron .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Stock Header */
+.stock-header {
+  background: var(--accent-gradient);
+  color: white;
+  padding: 2.5rem 0;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.stock-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/static/chart-pattern.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.stock-price {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.price-change {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.price-up {
+  color: var(--success);
+}
+
+.price-down {
+  color: var(--danger);
+}
+
+/* Footer Styles */
+.footer {
+  background-color: var(--footer);
+  color: white;
+  padding: 3rem 0 2rem;
+  margin-top: 4rem;
+  transition: background-color 0.3s ease;
+}
+
+.footer h5 {
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.footer h5::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 2px;
+  background: var(--accent-gradient);
+  bottom: 0;
+  left: 0;
+}
+
+.footer a {
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.3s ease;
+}
+
+.footer a:hover {
+  color: white;
+  text-decoration: none;
+}
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.8s ease forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.8s ease forwards;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Animation Delays */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* Tooltip Styles */
+.tooltip-inner {
+  max-width: 300px;
+  padding: 10px 15px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 10px var(--shadow);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.bs-tooltip-auto[x-placement^=top] .arrow::before,
+.bs-tooltip-top .arrow::before {
+  border-top-color: var(--border);
+}
+
+.bs-tooltip-auto[x-placement^=bottom] .arrow::before,
+.bs-tooltip-bottom .arrow::before {
+  border-bottom-color: var(--border);
+}
+
+.bs-tooltip-auto[x-placement^=left] .arrow::before,
+.bs-tooltip-left .arrow::before {
+  border-left-color: var(--border);
+}
+
+.bs-tooltip-auto[x-placement^=right] .arrow::before,
+.bs-tooltip-right .arrow::before {
+  border-right-color: var(--border);
+}
+
+/* Financial Term Tooltip */
+.financial-term {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .jumbotron {
+    padding: 3rem 1rem;
+  }
+
+  .stock-price {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .stock-header {
+    padding: 2rem 0;
+  }
+
+  .stock-price {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .jumbotron {
+    padding: 2rem 1rem;
+  }
+}
+/* Chat Styles */
+.message {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-message {
+  align-items: flex-end;
+}
+
+.bot-message,
+.system-message {
+  align-items: flex-start;
+}
+
+.message-content {
+  max-width: 85%;
+  padding: 12px 18px;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+.user-message .message-content {
+  background-color: var(--accent);
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.bot-message .message-content {
+  background-color: var(--card-bg);
+  color: var(--text);
+  border-bottom-left-radius: 5px;
+  border: 1px solid var(--border);
+}
+
+.system-message .message-content {
+  background-color: var(--secondary);
+  color: white;
+  border-radius: 10px;
+  font-style: italic;
+}
+
+.message-content p {
+  margin-bottom: 0;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: var(--secondary);
+  margin-top: 5px;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px 15px;
+  background-color: var(--card-bg);
+  border-radius: 18px;
+  width: fit-content;
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+  animation: typing 1s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+}
+
+/* Improve bullet points in chat */
+.bot-message .message-content p {
+  padding-left: 5px;
+}
+
+.bot-message .message-content br + • {
+  margin-left: 5px;
+  display: inline-block;
+}
+
+/* Stock Stats */
+.stock-stats {
+  background-color: var(--card-bg);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 15px var(--shadow);
+  margin-bottom: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.stock-stats .h4 {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.stock-stats .h6 {
+  font-weight: 500;
+}
+
+/* Prediction Card */
+.prediction-card .card-header {
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+}
+
+/* Sentiment Card */
+.sentiment-card .card-header {
+  background: linear-gradient(135deg, #28a745, #00c6ff);
+}
+
+/* Technical Card */
+.technical-card .card-header {
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+}
+
+/* Risk Card */
+.risk-card .card-header {
+  background: linear-gradient(135deg, #dc3545, #ff9800);
+}
+
+/* Portfolio Card */
+.add-portfolio-card .card-header {
+  background: linear-gradient(135deg, #6f42c1, #007bff);
 }
 .btn-style-pinks-nav {
 	position: relative;
@@ -540,7 +956,7 @@ img {
 	color: #ffffff;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 04.Particles */
 
 /*------------------------------------------*/
@@ -668,7 +1084,7 @@ canvas {
 	animation-timing-function: linear;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 05.Image  */
 
 /*------------------------------------------*/
@@ -1011,7 +1427,7 @@ canvas {
 }
 
 /*------------------------------------------*/
-/* 
+/*
 /* 06.Full wirth Video */
 
 /*------------------------------------------*/
@@ -1080,7 +1496,7 @@ canvas {
 } {
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 07.Demo Heading */
 
 /*------------------------------------------*/
@@ -1161,7 +1577,7 @@ p.para {
 	margin-top: 0px;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 08.Banner text*/
 
 /*------------------------------------------*/
@@ -1578,7 +1994,7 @@ video {
 	background: #f1f1f1;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 09. Side Tab */
 
 /*------------------------------------------*/
@@ -1672,7 +2088,7 @@ nav-tabs>li {
 	margin: 0;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 10. Special Features */
 
 /*------------------------------------------*/
@@ -1777,7 +2193,7 @@ nav-tabs>li {
 	width: 80px;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 11. Features Services ii */
 
 /*------------------------------------------*/
@@ -1901,7 +2317,7 @@ nav-tabs>li {
 	transition: all 0.6s ease 0s;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 12.Awesome Features */
 
 /*------------------------------------------*/
@@ -2265,7 +2681,7 @@ ul.pagination li a {
 {
 }
 /*-----------------------------------------*/
-/* 
+/*
 /* 13.Newsletter */
 
 /*------------------------------------------*/
@@ -2318,7 +2734,7 @@ ul.pagination li a {
 	border: 1px solid #fff;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 14.Benefit */
 
 /*------------------------------------------*/
@@ -2539,7 +2955,7 @@ main-bane {
 	width: 100%;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 15.Navigation */
 
 /*------------------------------------------*/
@@ -2880,7 +3296,7 @@ nav.transparrent-bg .menuzord-brand {
 }
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 16.Content right left */
 
 /*------------------------------------------*/
@@ -3071,7 +3487,7 @@ nav.transparrent-bg .menuzord-brand {
 	background: #000;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 17.Section */
 
 /*------------------------------------------*/
@@ -3152,7 +3568,7 @@ nav.transparrent-bg .menuzord-brand {
 	border: 0;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 18. Feature Services iii */
 
 /*------------------------------------------*/
@@ -3229,7 +3645,7 @@ nav.transparrent-bg .menuzord-brand {
 	background: #f1f1f1;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 19. feature */
 
 /*------------------------------------------*/
@@ -3440,7 +3856,7 @@ nav.transparrent-bg .menuzord-brand {
 	padding: 30px 0;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 20.About Us */
 
 /*------------------------------------------*/
@@ -3591,7 +4007,7 @@ nav.transparrent-bg .menuzord-brand {
 	padding: 110px 0 0px 0;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 21.Portfolio */
 
 /*------------------------------------------*/
@@ -3610,7 +4026,7 @@ nav.transparrent-bg .menuzord-brand {
 	margin: 0px;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 22.Tabile price */
 
 /*------------------------------------------*/
@@ -3716,7 +4132,7 @@ nav.transparrent-bg .menuzord-brand {
 	width: auto;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 23. Shop product */
 
 /*------------------------------------------*/
@@ -4538,7 +4954,7 @@ ul.pagination li a.next:hover {
  transition: all .5s;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 24 Events */
 
 /*------------------------------------------*/
@@ -4616,7 +5032,7 @@ ul.pagination li a.next:hover {
 	margin-bottom: 10px;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 25 About Coin */
 
 /*------------------------------------------*/
@@ -4793,7 +5209,7 @@ main-bane {
 	width: 100%;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 26 Investor*/
 
 /*------------------------------------------*/
@@ -4924,7 +5340,7 @@ main-bane {
 	margin-bottom: 20px;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 27. Achivements */
 
 /*------------------------------------------*/
@@ -5028,7 +5444,7 @@ main-bane {
 	font-weight: 600;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 28.Faq Tab*/
 
 /*------------------------------------------*/
@@ -5103,7 +5519,7 @@ a.accordion-toggle i {
 	color: #000;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 29.Special Features */
 
 /*------------------------------------------*/
@@ -5211,7 +5627,7 @@ a.accordion-toggle i {
 	width: 80px;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 30.Superb Benifit */
 
 /*------------------------------------------*/
@@ -5320,7 +5736,7 @@ a.accordion-toggle i {
 	transition: all 0.6s ease 0s;
 }
 /*-----------------------------------------*/
-/* 
+/*
 /* 31.Contact Us */
 
 /*------------------------------------------*/
@@ -5454,7 +5870,7 @@ label {
  color: #ffffff;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 32.Blog */
 
 /*------------------------------------------*/
@@ -5762,7 +6178,7 @@ label {
 	color: #ffaa00;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 33.Team Box */
 
 /*------------------------------------------*/
@@ -5867,7 +6283,7 @@ label {
 }
 /* general carousel */
 /*------------------------------------------*/
-/* 
+/*
 /* 34. Owl Slide */
 
 /*------------------------------------------*/
@@ -6023,7 +6439,7 @@ label {
 	padding-top:9px;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 35.Footer */
 
 /*------------------------------------------*/
@@ -6348,7 +6764,7 @@ nav#footer p {
 	padding:80px 0 0 0;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 36.Preloader */
 
 /*------------------------------------------*/
@@ -6403,7 +6819,7 @@ nav#footer p {
 }
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 37. Back to top */
 
 /*------------------------------------------*/
@@ -6436,7 +6852,7 @@ nav#footer p {
 	opacity: 1;
 }
 /*----------------------------------------*/
-/* 
+/*
 /* 38.work */
 
 /*------------------------------------------*/
@@ -6503,7 +6919,7 @@ nav#footer p {
 	vertical-align: middle;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 39. Login Page */
 
 /*------------------------------------------*/
@@ -6660,7 +7076,7 @@ input[type="radio"], input[type="checkbox"] {
 	padding-top: 20px;
 }
 /*-----------------------------------------*/
-/* 
+/*
 /* 40.Contact Us */
 
 /*------------------------------------------*/
@@ -6799,7 +7215,7 @@ label {
  color: #ffffff;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 41.Contact pop */
 
 /*------------------------------------------*/
@@ -6905,7 +7321,7 @@ label {
 	border: none;
 }
 /*------------------------------------------*/
-/* 
+/*
 /* 42.Error */
 
 /*------------------------------------------*/
