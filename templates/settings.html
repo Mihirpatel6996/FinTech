@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings - FINTECH{% endblock %}
+
+{% block extra_css %}
+<style>
+  .settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .nav-pills .nav-link {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #6610f2, #007bff);
+  }
+  .tab-pane {
+    padding: 1.5rem;
+  }
+  .settings-header {
+    background: linear-gradient(135deg, #6610f2, #007bff);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <!-- Settings Header -->
+  <div class="settings-header text-center mb-4">
+    <h1><i class="fas fa-cog mr-2"></i>Account Settings</h1>
+    <p class="lead">Manage your account preferences and settings</p>
+  </div>
+
+  <div class="settings-container">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <a class="nav-link active" id="profile-tab" data-toggle="pill" href="#profile" role="tab" aria-controls="profile" aria-selected="true">
+            <i class="fas fa-user mr-2"></i>Profile
+          </a>
+          <a class="nav-link" id="password-tab" data-toggle="pill" href="#password" role="tab" aria-controls="password" aria-selected="false">
+            <i class="fas fa-lock mr-2"></i>Password
+          </a>
+          <a class="nav-link" id="notifications-tab" data-toggle="pill" href="#notifications" role="tab" aria-controls="notifications" aria-selected="false">
+            <i class="fas fa-bell mr-2"></i>Notifications
+          </a>
+          <a class="nav-link" id="preferences-tab" data-toggle="pill" href="#preferences" role="tab" aria-controls="preferences" aria-selected="false">
+            <i class="fas fa-sliders-h mr-2"></i>Preferences
+          </a>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="card">
+          <div class="tab-content" id="v-pills-tabContent">
+            <!-- Profile Settings -->
+            <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+              <div class="card-header">
+                <h3 class="mb-0">Profile Information</h3>
+              </div>
+              <div class="card-body">
+                <form action="/settings/profile" method="post" enctype="multipart/form-data">
+                  <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" value="{{ user.username }}" disabled>
+                    <small class="form-text text-muted">Username cannot be changed</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                    <small class="form-text text-muted">Email cannot be changed</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}">
+                  </div>
+                  <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.bio }}</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="profile_pic">Profile Picture</label>
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" id="profile_pic" name="profile_pic">
+                      <label class="custom-file-label" for="profile_pic">Choose file</label>
+                    </div>
+                    <small class="form-text text-muted">Max file size: 5MB. Supported formats: JPG, PNG, GIF</small>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Password Settings -->
+            <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
+              <div class="card-header">
+                <h3 class="mb-0">Change Password</h3>
+              </div>
+              <div class="card-body">
+                <form action="/settings/password" method="post">
+                  <div class="form-group">
+                    <label for="current_password">Current Password</label>
+                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                    <small class="form-text text-muted">Password must be at least 8 characters long and include a mix of letters, numbers, and special characters.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm_password">Confirm New Password</label>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+              <div class="card-header">
+                <h3 class="mb-0">Notification Preferences</h3>
+              </div>
+              <div class="card-body">
+                <form action="/settings/notifications" method="post">
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="email_notifications" name="email_notifications" {% if user.email_notifications %}checked{% endif %}>
+                      <label class="custom-control-label" for="email_notifications">Email Notifications</label>
+                    </div>
+                    <small class="form-text text-muted">Receive notifications via email</small>
+                  </div>
+                  <hr>
+                  <h5>Notification Types</h5>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="price_alerts" name="price_alerts" {% if user.preferences and user.preferences.price_alerts %}checked{% endif %}>
+                      <label class="custom-control-label" for="price_alerts">Price Alerts</label>
+                    </div>
+                    <small class="form-text text-muted">Get notified when stocks in your watchlist reach your target price</small>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="portfolio_updates" name="portfolio_updates" {% if user.preferences and user.preferences.portfolio_updates %}checked{% endif %}>
+                      <label class="custom-control-label" for="portfolio_updates">Portfolio Updates</label>
+                    </div>
+                    <small class="form-text text-muted">Get daily or weekly updates on your portfolio performance</small>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="news_alerts" name="news_alerts" {% if user.preferences and user.preferences.news_alerts %}checked{% endif %}>
+                      <label class="custom-control-label" for="news_alerts">News Alerts</label>
+                    </div>
+                    <small class="form-text text-muted">Get notified about important news related to your holdings</small>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="system_updates" name="system_updates" {% if user.preferences and user.preferences.system_updates %}checked{% endif %}>
+                      <label class="custom-control-label" for="system_updates">System Updates</label>
+                    </div>
+                    <small class="form-text text-muted">Get notified about new features and platform updates</small>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Save Preferences</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- App Preferences -->
+            <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+              <div class="card-header">
+                <h3 class="mb-0">Application Preferences</h3>
+              </div>
+              <div class="card-body">
+                <form action="/settings/preferences" method="post">
+                  <div class="form-group">
+                    <label for="default_chart_type">Default Chart Type</label>
+                    <select class="form-control" id="default_chart_type" name="default_chart_type">
+                      <option value="candlestick" {% if user.preferences and user.preferences.default_chart_type == 'candlestick' %}selected{% endif %}>Candlestick</option>
+                      <option value="line" {% if user.preferences and user.preferences.default_chart_type == 'line' %}selected{% endif %}>Line</option>
+                      <option value="ohlc" {% if user.preferences and user.preferences.default_chart_type == 'ohlc' %}selected{% endif %}>OHLC</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="default_time_period">Default Time Period</label>
+                    <select class="form-control" id="default_time_period" name="default_time_period">
+                      <option value="1m" {% if user.preferences and user.preferences.default_time_period == '1m' %}selected{% endif %}>1 Month</option>
+                      <option value="3m" {% if user.preferences and user.preferences.default_time_period == '3m' %}selected{% endif %}>3 Months</option>
+                      <option value="6m" {% if user.preferences and user.preferences.default_time_period == '6m' %}selected{% endif %}>6 Months</option>
+                      <option value="1y" {% if user.preferences and user.preferences.default_time_period == '1y' %}selected{% endif %}>1 Year</option>
+                      <option value="5y" {% if user.preferences and user.preferences.default_time_period == '5y' %}selected{% endif %}>5 Years</option>
+                    </select>
+                  </div>
+                  <hr>
+                  <h5>Default Indicators</h5>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="show_sma" name="show_sma" {% if user.preferences and user.preferences.indicators and user.preferences.indicators.sma %}checked{% endif %}>
+                      <label class="custom-control-label" for="show_sma">Simple Moving Average (SMA)</label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="show_ema" name="show_ema" {% if user.preferences and user.preferences.indicators and user.preferences.indicators.ema %}checked{% endif %}>
+                      <label class="custom-control-label" for="show_ema">Exponential Moving Average (EMA)</label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="show_bollinger" name="show_bollinger" {% if user.preferences and user.preferences.indicators and user.preferences.indicators.bollinger %}checked{% endif %}>
+                      <label class="custom-control-label" for="show_bollinger">Bollinger Bands</label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="show_rsi" name="show_rsi" {% if user.preferences and user.preferences.indicators and user.preferences.indicators.rsi %}checked{% endif %}>
+                      <label class="custom-control-label" for="show_rsi">Relative Strength Index (RSI)</label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="show_macd" name="show_macd" {% if user.preferences and user.preferences.indicators and user.preferences.indicators.macd %}checked{% endif %}>
+                      <label class="custom-control-label" for="show_macd">MACD</label>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Save Preferences</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Show the custom file input name when a file is selected
+  $('.custom-file-input').on('change', function() {
+    var fileName = $(this).val().split('\\').pop();
+    $(this).next('.custom-file-label').html(fileName);
+  });
+
+  // Password confirmation validation
+  $('#confirm_password').on('input', function() {
+    var password = $('#new_password').val();
+    var confirmPassword = $(this).val();
+    
+    if (password !== confirmPassword) {
+      $(this).addClass('is-invalid');
+    } else {
+      $(this).removeClass('is-invalid');
+    }
+  });
+
+  // Activate tab based on URL hash
+  $(document).ready(function() {
+    var hash = window.location.hash;
+    if (hash) {
+      $('.nav-pills a[href="' + hash + '"]').tab('show');
+    }
+  });
+
+  // Update URL hash when tab changes
+  $('.nav-pills a').on('click', function(e) {
+    window.location.hash = $(this).attr('href');
+  });
+</script>
+{% endblock %}

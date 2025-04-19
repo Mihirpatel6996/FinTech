@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+
+{% block title %}{{ symbol }} - Stock Details - FINTECH{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+<style>
+  .stock-header {
+    background: linear-gradient(135deg, #6610f2, #007bff);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+  }
+  .stock-price {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  .price-change {
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+  }
+  .price-change.positive {
+    color: #28a745;
+  }
+  .price-change.negative {
+    color: #dc3545;
+  }
+  .stock-info {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+  .info-label {
+    font-weight: 600;
+    color: #6c757d;
+  }
+  .info-value {
+    font-weight: 500;
+  }
+  .chart-container {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+  .nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #6610f2, #007bff);
+  }
+  .nav-pills .nav-link {
+    color: #495057;
+  }
+  .tab-pane {
+    padding: 1.5rem 0;
+  }
+  .sentiment-positive {
+    color: #28a745;
+  }
+  .sentiment-negative {
+    color: #dc3545;
+  }
+  .sentiment-neutral {
+    color: #6c757d;
+  }
+  .add-to-portfolio-btn {
+    background: linear-gradient(135deg, #6610f2, #007bff);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  .add-to-portfolio-btn:hover {
+    background: linear-gradient(135deg, #5a0fc1, #0069d9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: white;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <!-- Stock Header -->
+  <div class="stock-header text-center">
+    <div class="container">
+      <h1 class="display-4">{{ symbol }}</h1>
+      <p class="lead">{{ company_name }}</p>
+      <div class="stock-price">
+        ${{ "%.2f"|format(current_price) }}
+        <span class="price-change {% if price_change >= 0 %}positive{% else %}negative{% endif %}">
+          {% if price_change >= 0 %}
+          <i class="fas fa-caret-up"></i>
+          {% else %}
+          <i class="fas fa-caret-down"></i>
+          {% endif %}
+          {{ "%.2f"|format(price_change|abs) }} ({{ "%.2f"|format(price_change_percent|abs) }}%)
+        </span>
+      </div>
+      <p class="text-light">{{ exchange }} • {{ sector }}</p>
+      
+      {% if user %}
+      <button type="button" class="btn add-to-portfolio-btn mt-3" data-toggle="modal" data-target="#addToPortfolioModal">
+        <i class="fas fa-plus-circle mr-1"></i> Add to Portfolio
+      </button>
+      {% else %}
+      <a href="/login" class="btn btn-light mt-3">
+        <i class="fas fa-sign-in-alt mr-1"></i> Login to Add to Portfolio
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Stock Info -->
+  <div class="row">
+    <div class="col-md-4">
+      <div class="stock-info">
+        <h3 class="mb-3">Stock Information</h3>
+        <div class="row mb-2">
+          <div class="col-6 info-label">Open</div>
+          <div class="col-6 info-value">${{ "%.2f"|format(open_price) }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">High</div>
+          <div class="col-6 info-value">${{ "%.2f"|format(high_price) }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">Low</div>
+          <div class="col-6 info-value">${{ "%.2f"|format(low_price) }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">Volume</div>
+          <div class="col-6 info-value">{{ "{:,}".format(volume) }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">Market Cap</div>
+          <div class="col-6 info-value">{{ market_cap }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">52 Week High</div>
+          <div class="col-6 info-value">${{ "%.2f"|format(year_high) }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">52 Week Low</div>
+          <div class="col-6 info-value">${{ "%.2f"|format(year_low) }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">P/E Ratio</div>
+          <div class="col-6 info-value">{{ "%.2f"|format(pe_ratio) if pe_ratio else 'N/A' }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6 info-label">Dividend Yield</div>
+          <div class="col-6 info-value">{{ "%.2f"|format(dividend_yield) }}%</div>
+        </div>
+      </div>
+
+      <!-- Sentiment Analysis -->
+      <div class="stock-info">
+        <h3 class="mb-3">Market Sentiment</h3>
+        <div class="text-center mb-3">
+          <div class="sentiment-score">
+            <span class="h1 {% if sentiment_score > 0.2 %}sentiment-positive{% elif sentiment_score < -0.2 %}sentiment-negative{% else %}sentiment-neutral{% endif %}">
+              {% if sentiment_score > 0.2 %}
+              <i class="fas fa-smile fa-2x"></i>
+              {% elif sentiment_score < -0.2 %}
+              <i class="fas fa-frown fa-2x"></i>
+              {% else %}
+              <i class="fas fa-meh fa-2x"></i>
+              {% endif %}
+            </span>
+          </div>
+          <h4 class="mt-2 {% if sentiment_score > 0.2 %}sentiment-positive{% elif sentiment_score < -0.2 %}sentiment-negative{% else %}sentiment-neutral{% endif %}">
+            {{ sentiment_description }}
+          </h4>
+          <p>Sentiment Score: {{ "%.2f"|format(sentiment_score) }}</p>
+        </div>
+        <p class="text-muted small">Based on analysis of {{ sentiment_data|length }} recent news articles</p>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <!-- Tabs for different charts -->
+      <ul class="nav nav-pills mb-3" id="stockTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="price-tab" data-toggle="pill" href="#price" role="tab" aria-controls="price" aria-selected="true">Price Chart</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="prediction-tab" data-toggle="pill" href="#prediction" role="tab" aria-controls="prediction" aria-selected="false">Predictions</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="technical-tab" data-toggle="pill" href="#technical" role="tab" aria-controls="technical" aria-selected="false">Technical Indicators</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="news-tab" data-toggle="pill" href="#news" role="tab" aria-controls="news" aria-selected="false">News</a>
+        </li>
+      </ul>
+      
+      <div class="tab-content" id="stockTabContent">
+        <!-- Price Chart Tab -->
+        <div class="tab-pane fade show active" id="price" role="tabpanel" aria-labelledby="price-tab">
+          <div class="chart-container">
+            <h3 class="mb-3">Price History</h3>
+            <div class="btn-group btn-group-sm mb-3" role="group" aria-label="Time Range">
+              <button type="button" class="btn btn-outline-primary" data-range="1m">1M</button>
+              <button type="button" class="btn btn-outline-primary" data-range="3m">3M</button>
+              <button type="button" class="btn btn-outline-primary active" data-range="6m">6M</button>
+              <button type="button" class="btn btn-outline-primary" data-range="1y">1Y</button>
+              <button type="button" class="btn btn-outline-primary" data-range="5y">5Y</button>
+            </div>
+            <div id="priceChart" style="height: 400px;">
+              <img src="/static/{{ viz_paths['Trends'].path }}" class="img-fluid" alt="Price Chart">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Predictions Tab -->
+        <div class="tab-pane fade" id="prediction" role="tabpanel" aria-labelledby="prediction-tab">
+          <div class="chart-container">
+            <h3 class="mb-3">Price Predictions</h3>
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">Model Predictions</h5>
+                  </div>
+                  <div class="card-body">
+                    <table class="table table-striped">
+                      <tr>
+                        <td>ARIMA Prediction:</td>
+                        <td>
+                          ${{ "%.2f"|format(arima_pred) }}
+                          <small class="text-muted">(Error: {{ "%.2f"|format(error_arima) }})</small>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>LSTM Prediction:</td>
+                        <td>
+                          ${{ "%.2f"|format(lstm_pred) }}
+                          <small class="text-muted">(Error: {{ "%.2f"|format(error_lstm) }})</small>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Linear Regression:</td>
+                        <td>
+                          ${{ "%.2f"|format(lr_pred) }}
+                          <small class="text-muted">(Error: {{ "%.2f"|format(error_lr) }})</small>
+                        </td>
+                      </tr>
+                      <tr class="table-primary">
+                        <td><strong>Ensemble Prediction:</strong></td>
+                        <td>
+                          <strong>${{ "%.2f"|format(ensemble_pred) }}</strong>
+                          <small class="text-muted">(Weighted average)</small>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">Prediction Accuracy</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="text-center">
+                      <div class="h1 mb-3">{{ "%.1f"|format(prediction_accuracy * 100) }}%</div>
+                      <p class="text-muted">Historical prediction accuracy</p>
+                    </div>
+                    <div class="progress">
+                      <div class="progress-bar bg-success" role="progressbar" style="width: {{ prediction_accuracy * 100 }}%" aria-valuenow="{{ prediction_accuracy * 100 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <img src="/static/{{ viz_paths['ARIMA'].path }}" class="img-fluid mb-3" alt="ARIMA Predictions">
+              </div>
+              <div class="col-md-6">
+                <img src="/static/{{ viz_paths['LSTM'].path }}" class="img-fluid mb-3" alt="LSTM Predictions">
+              </div>
+              <div class="col-md-6">
+                <img src="/static/{{ viz_paths['LR'].path }}" class="img-fluid mb-3" alt="Linear Regression Predictions">
+              </div>
+              {% if 'ENSEMBLE' in viz_paths %}
+              <div class="col-md-6">
+                <img src="/static/{{ viz_paths['ENSEMBLE'].path }}" class="img-fluid mb-3" alt="Ensemble Predictions">
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Technical Indicators Tab -->
+        <div class="tab-pane fade" id="technical" role="tabpanel" aria-labelledby="technical-tab">
+          <div class="chart-container">
+            <h3 class="mb-3">Technical Indicators</h3>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h5 class="mb-0">RSI (Relative Strength Index)</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="text-center mb-3">
+                      <div class="h2 mb-0 {% if rsi > 70 %}text-danger{% elif rsi < 30 %}text-success{% else %}text-primary{% endif %}">
+                        {{ "%.2f"|format(rsi) }}
+                      </div>
+                      <p class="text-muted">
+                        {% if rsi > 70 %}
+                        Overbought
+                        {% elif rsi < 30 %}
+                        Oversold
+                        {% else %}
+                        Neutral
+                        {% endif %}
+                      </p>
+                    </div>
+                    <div class="progress" style="height: 20px;">
+                      <div class="progress-bar bg-danger" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">Oversold</div>
+                      <div class="progress-bar bg-success" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">Neutral</div>
+                      <div class="progress-bar bg-danger" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">Overbought</div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-1">
+                      <small>0</small>
+                      <small>30</small>
+                      <small>70</small>
+                      <small>100</small>
+                    </div>
+                    <div class="position-relative mt-2">
+                      <div class="position-absolute" style="left: calc({{ rsi }}% - 5px); top: -10px;">
+                        <i class="fas fa-caret-down text-dark"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h5 class="mb-0">MACD (Moving Average Convergence Divergence)</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="text-center mb-3">
+                      <div class="h2 mb-0 {% if macd_value > 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ "%.2f"|format(macd_value) }}
+                      </div>
+                      <p class="text-muted">
+                        {% if macd_value > 0 %}
+                        Bullish
+                        {% else %}
+                        Bearish
+                        {% endif %}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h5 class="mb-0">Moving Averages</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="text-center mb-3">
+                          <h6>SMA 20</h6>
+                          <div class="h4 mb-0">${{ "%.2f"|format(sma_20) }}</div>
+                          <p class="{% if current_price > sma_20 %}text-success{% else %}text-danger{% endif %}">
+                            {% if current_price > sma_20 %}
+                            Above <i class="fas fa-arrow-up"></i>
+                            {% else %}
+                            Below <i class="fas fa-arrow-down"></i>
+                            {% endif %}
+                          </p>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="text-center mb-3">
+                          <h6>SMA 50</h6>
+                          <div class="h4 mb-0">${{ "%.2f"|format(sma_50) }}</div>
+                          <p class="{% if current_price > sma_50 %}text-success{% else %}text-danger{% endif %}">
+                            {% if current_price > sma_50 %}
+                            Above <i class="fas fa-arrow-up"></i>
+                            {% else %}
+                            Below <i class="fas fa-arrow-down"></i>
+                            {% endif %}
+                          </p>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="text-center mb-3">
+                          <h6>SMA 200</h6>
+                          <div class="h4 mb-0">${{ "%.2f"|format(sma_200) }}</div>
+                          <p class="{% if current_price > sma_200 %}text-success{% else %}text-danger{% endif %}">
+                            {% if current_price > sma_200 %}
+                            Above <i class="fas fa-arrow-up"></i>
+                            {% else %}
+                            Below <i class="fas fa-arrow-down"></i>
+                            {% endif %}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- News Tab -->
+        <div class="tab-pane fade" id="news" role="tabpanel" aria-labelledby="news-tab">
+          <div class="chart-container">
+            <h3 class="mb-3">Recent News</h3>
+            {% if sentiment_data and sentiment_data|length > 0 %}
+            <div class="row">
+              {% for article in sentiment_data %}
+              <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-header {% if article.sentiment > 0.2 %}bg-success text-white{% elif article.sentiment < -0.2 %}bg-danger text-white{% else %}bg-light{% endif %}">
+                    <h5 class="mb-0">{{ article.title }}</h5>
+                  </div>
+                  <div class="card-body">
+                    <p>{{ article.text[:200] }}{% if article.text|length > 200 %}...{% endif %}</p>
+                    <p class="text-muted">Source: {{ article.source }}</p>
+                    <p class="text-muted">Published: {{ article.published_at }}</p>
+                    <p class="{% if article.sentiment > 0.2 %}text-success{% elif article.sentiment < -0.2 %}text-danger{% else %}text-secondary{% endif %}">
+                      Sentiment: {{ "%.2f"|format(article.sentiment) }}
+                    </p>
+                  </div>
+                  <div class="card-footer">
+                    <a href="{{ article.url }}" target="_blank" class="btn btn-sm btn-primary">Read More</a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle mr-2"></i> No recent news articles found for {{ symbol }}.
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add to Portfolio Modal -->
+{% if user %}
+<div class="modal fade" id="addToPortfolioModal" tabindex="-1" aria-labelledby="addToPortfolioModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addToPortfolioModalLabel">Add {{ symbol }} to Portfolio</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addToPortfolioForm" action="/api/add-to-portfolio" method="post">
+          <input type="hidden" name="symbol" value="{{ symbol }}">
+          
+          <div class="form-group">
+            <label for="portfolio_id">Select Portfolio</label>
+            <select class="form-control selectpicker" id="portfolio_id" name="portfolio_id" data-live-search="true" required>
+              <option value="">Select a portfolio</option>
+              {% for portfolio in portfolios %}
+              <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
+              {% endfor %}
+            </select>
+            {% if not portfolios %}
+            <small class="form-text text-muted">
+              You don't have any portfolios yet. <a href="/portfolio" target="_blank">Create a portfolio</a> first.
+            </small>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" min="0.01" step="0.01" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="purchase_price">Purchase Price</label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">$</span>
+              </div>
+              <input type="number" class="form-control" id="purchase_price" name="purchase_price" value="{{ current_price }}" min="0.01" step="0.01" required>
+            </div>
+            <small class="form-text text-muted">Current price: ${{ "%.2f"|format(current_price) }}</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="purchase_date">Purchase Date</label>
+            <input type="date" class="form-control" id="purchase_date" name="purchase_date" value="{{ today_date }}" required>
+          </div>
+          
+          <div class="alert alert-info">
+            <div class="row">
+              <div class="col-6">Total Cost:</div>
+              <div class="col-6 text-right" id="totalCost">${{ "%.2f"|format(current_price) }}</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="submit" form="addToPortfolioForm" class="btn btn-primary">Add to Portfolio</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // Initialize selectpicker
+    $('.selectpicker').selectpicker();
+    
+    // Calculate total cost when quantity or price changes
+    $('#quantity, #purchase_price').on('input', function() {
+      const quantity = parseFloat($('#quantity').val()) || 0;
+      const price = parseFloat($('#purchase_price').val()) || 0;
+      const total = quantity * price;
+      $('#totalCost').text('$' + total.toFixed(2));
+    });
+    
+    // Handle time range buttons for price chart
+    $('.btn-group[role="group"] .btn').click(function() {
+      // Remove active class from all buttons
+      $(this).siblings().removeClass('active');
+      // Add active class to clicked button
+      $(this).addClass('active');
+      
+      // Get selected time range
+      const range = $(this).data('range');
+      
+      // Here you would update the chart with the new time range
+      // This would typically involve an AJAX call to get new data
+      console.log('Selected time range:', range);
+      
+      // For demonstration purposes, we'll just show an alert
+      // In a real implementation, you would fetch new data and update the chart
+      // $('#priceChart').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+      // 
+      // $.ajax({
+      //   url: '/api/stock-history',
+      //   data: { symbol: '{{ symbol }}', range: range },
+      //   success: function(data) {
+      //     // Update chart with new data
+      //   }
+      // });
+    });
+    
+    // Form validation
+    $('#addToPortfolioForm').on('submit', function(e) {
+      const portfolioId = $('#portfolio_id').val();
+      const quantity = parseFloat($('#quantity').val());
+      
+      if (!portfolioId) {
+        e.preventDefault();
+        alert('Please select a portfolio');
+        return false;
+      }
+      
+      if (!quantity || quantity <= 0) {
+        e.preventDefault();
+        alert('Please enter a valid quantity');
+        return false;
+      }
+      
+      return true;
+    });
+  });
+</script>
+{% endblock %}
