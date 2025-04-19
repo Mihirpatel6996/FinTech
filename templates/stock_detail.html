@@ -98,6 +98,99 @@
       .add-portfolio-card {
         border-left: 5px solid #6f42c1;
       }
+      /* Chat styles */
+      .message {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+      }
+      .user-message {
+        align-items: flex-end;
+      }
+      .bot-message,
+      .system-message {
+        align-items: flex-start;
+      }
+      .message-content {
+        max-width: 85%;
+        padding: 12px 18px;
+        border-radius: 18px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      .user-message .message-content {
+        background-color: #007bff;
+        color: white;
+        border-bottom-right-radius: 5px;
+      }
+      .bot-message .message-content {
+        background-color: #f8f9fa;
+        color: #333;
+        border-bottom-left-radius: 5px;
+        border: 1px solid #e9ecef;
+      }
+      .system-message .message-content {
+        background-color: #e9ecef;
+        color: #666;
+        border-radius: 10px;
+        font-style: italic;
+      }
+      .message-content p {
+        margin-bottom: 0;
+        line-height: 1.5;
+        word-wrap: break-word;
+      }
+      .message-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 5px;
+      }
+      .typing-indicator {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 8px 15px;
+        background-color: #f8f9fa;
+        border-radius: 18px;
+        width: fit-content;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        background-color: #007bff;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        animation: typing 1s infinite;
+      }
+      .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes typing {
+        0% {
+          opacity: 0.4;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2);
+        }
+        100% {
+          opacity: 0.4;
+          transform: scale(1);
+        }
+      }
+      /* Improve bullet points in chat */
+      .bot-message .message-content p {
+        padding-left: 5px;
+      }
+      .bot-message .message-content br + • {
+        margin-left: 5px;
+        display: inline-block;
+      }
     </style>
   </head>
   <body>
@@ -127,18 +220,7 @@
               <a class="nav-link" href="/education">Education</a>
             </li>
           </ul>
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="#"
-                ><i class="fas fa-user mr-1"></i>Login</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#"
-                ><i class="fas fa-user-plus mr-1"></i>Register</a
-              >
-            </li>
-          </ul>
+          <!-- Login/Register links removed -->
         </div>
       </div>
     </nav>
@@ -154,17 +236,17 @@
           </div>
           <div class="col-md-6 text-right">
             <div class="stock-price">${{ latest_price }}</div>
-            <div class="price-change {% if price_change >= 0 %}price-up{% else %}price-down{% endif %}">
+            <div
+              class="price-change {% if price_change >= 0 %}price-up{% else %}price-down{% endif %}"
+            >
               {% if price_change >= 0 %}
               <i class="fas fa-arrow-up mr-1"></i>
               {% else %}
               <i class="fas fa-arrow-down mr-1"></i>
-              {% endif %}
-              ${{ price_change_amount }} ({{ price_change_percent }}%)
+              {% endif %} ${{ price_change_amount }} ({{ price_change_percent
+              }}%)
             </div>
-            <div class="text-light">
-              Last updated: {{ latest_date }}
-            </div>
+            <div class="text-light">Last updated: {{ latest_date }}</div>
           </div>
         </div>
       </div>
@@ -208,26 +290,43 @@
       <!-- Action Buttons -->
       <div class="row mb-4">
         <div class="col-md-12 text-center">
-          <form action="/predict" method="post" class="d-inline-block mr-2 mb-2">
-            <input type="hidden" name="symbol" value="{{ symbol }}">
+          <form
+            action="/predict"
+            method="post"
+            class="d-inline-block mr-2 mb-2"
+          >
+            <input type="hidden" name="symbol" value="{{ symbol }}" />
             <button type="submit" class="btn btn-primary btn-action">
               <i class="fas fa-chart-line mr-1"></i> Price Prediction
             </button>
           </form>
-          <form action="/technical-indicators" method="post" class="d-inline-block mr-2 mb-2">
-            <input type="hidden" name="symbol" value="{{ symbol }}">
-            <input type="hidden" name="indicator_type" value="all">
+          <form
+            action="/technical-indicators"
+            method="post"
+            class="d-inline-block mr-2 mb-2"
+          >
+            <input type="hidden" name="symbol" value="{{ symbol }}" />
+            <input type="hidden" name="indicator_type" value="all" />
             <button type="submit" class="btn btn-success btn-action">
               <i class="fas fa-chart-bar mr-1"></i> Technical Analysis
             </button>
           </form>
-          <form action="/risk-analysis" method="post" class="d-inline-block mr-2 mb-2">
-            <input type="hidden" name="symbol" value="{{ symbol }}">
+          <form
+            action="/risk-analysis"
+            method="post"
+            class="d-inline-block mr-2 mb-2"
+          >
+            <input type="hidden" name="symbol" value="{{ symbol }}" />
             <button type="submit" class="btn btn-danger btn-action">
               <i class="fas fa-exclamation-triangle mr-1"></i> Risk Analysis
             </button>
           </form>
-          <button type="button" class="btn btn-info btn-action mb-2" data-toggle="modal" data-target="#addToPortfolioModal">
+          <button
+            type="button"
+            class="btn btn-info btn-action mb-2"
+            data-toggle="modal"
+            data-target="#addToPortfolioModal"
+          >
             <i class="fas fa-folder-plus mr-1"></i> Add to Portfolio
           </button>
         </div>
@@ -236,28 +335,69 @@
       <!-- Main Content Tabs -->
       <ul class="nav nav-tabs" id="stockTabs" role="tablist">
         <li class="nav-item">
-          <a class="nav-link active" id="overview-tab" data-toggle="tab" href="#overview" role="tab">
+          <a
+            class="nav-link active"
+            id="overview-tab"
+            data-toggle="tab"
+            href="#overview"
+            role="tab"
+          >
             <i class="fas fa-home mr-1"></i> Overview
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="predictions-tab" data-toggle="tab" href="#predictions" role="tab">
+          <a
+            class="nav-link"
+            id="predictions-tab"
+            data-toggle="tab"
+            href="#predictions"
+            role="tab"
+          >
             <i class="fas fa-chart-line mr-1"></i> Predictions
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="technical-tab" data-toggle="tab" href="#technical" role="tab">
+          <a
+            class="nav-link"
+            id="technical-tab"
+            data-toggle="tab"
+            href="#technical"
+            role="tab"
+          >
             <i class="fas fa-chart-bar mr-1"></i> Technical
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="risk-tab" data-toggle="tab" href="#risk" role="tab">
+          <a
+            class="nav-link"
+            id="risk-tab"
+            data-toggle="tab"
+            href="#risk"
+            role="tab"
+          >
             <i class="fas fa-exclamation-triangle mr-1"></i> Risk
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="news-tab" data-toggle="tab" href="#news" role="tab">
+          <a
+            class="nav-link"
+            id="news-tab"
+            data-toggle="tab"
+            href="#news"
+            role="tab"
+          >
             <i class="fas fa-newspaper mr-1"></i> News
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            id="chatbot-tab"
+            data-toggle="tab"
+            href="#chatbot"
+            role="tab"
+          >
+            <i class="fas fa-robot mr-1"></i> AI Assistant
           </a>
         </li>
       </ul>
@@ -272,7 +412,11 @@
                   <h4 class="mb-0">Price History</h4>
                 </div>
                 <div class="card-body">
-                  <img src="/static/{{ price_chart_path }}" class="img-fluid" alt="Price History">
+                  <img
+                    src="/static/{{ price_chart_path }}"
+                    class="img-fluid"
+                    alt="Price History"
+                  />
                 </div>
               </div>
             </div>
@@ -284,7 +428,7 @@
                 <div class="card-body">
                   <h5 class="text-center">Ensemble Prediction</h5>
                   <h2 class="text-center">${{ ensemble_pred }}</h2>
-                  <hr>
+                  <hr />
                   <div class="row">
                     <div class="col-6">
                       <p class="mb-1">ARIMA</p>
@@ -305,7 +449,7 @@
                   </div>
                   <div class="text-center mt-3">
                     <form action="/predict" method="post">
-                      <input type="hidden" name="symbol" value="{{ symbol }}">
+                      <input type="hidden" name="symbol" value="{{ symbol }}" />
                       <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fas fa-chart-line mr-1"></i> Full Analysis
                       </button>
@@ -321,15 +465,29 @@
                 <div class="card-body">
                   <h5 class="text-center">{{ sentiment_description }}</h5>
                   <div class="progress mb-3">
-                    <div class="progress-bar bg-{{ sentiment_color }}" role="progressbar" 
-                         style="width: {{ (sentiment_score + 1) * 50 }}%" 
-                         aria-valuenow="{{ sentiment_score }}" aria-valuemin="-1" aria-valuemax="1">
+                    <div
+                      class="progress-bar bg-{{ sentiment_color }}"
+                      role="progressbar"
+                      style="width: {{ (sentiment_score + 1) * 50 }}%"
+                      aria-valuenow="{{ sentiment_score }}"
+                      aria-valuemin="-1"
+                      aria-valuemax="1"
+                    >
                       {{ sentiment_score }}
                     </div>
                   </div>
-                  <p class="text-center">Based on {{ sentiment_articles_count }} recent news articles</p>
+                  <p class="text-center">
+                    Based on {{ sentiment_articles_count }} recent news articles
+                  </p>
                   <div class="text-center mt-3">
-                    <a href="#news" class="btn btn-success btn-sm" data-toggle="tab" role="tab" aria-controls="news" aria-selected="false">
+                    <a
+                      href="#news"
+                      class="btn btn-success btn-sm"
+                      data-toggle="tab"
+                      role="tab"
+                      aria-controls="news"
+                      aria-selected="false"
+                    >
                       <i class="fas fa-newspaper mr-1"></i> View News
                     </a>
                   </div>
@@ -365,9 +523,12 @@
                   </div>
                   <div class="text-center mt-3">
                     <form action="/technical-indicators" method="post">
-                      <input type="hidden" name="symbol" value="{{ symbol }}">
-                      <input type="hidden" name="indicator_type" value="all">
-                      <button type="submit" class="btn btn-warning btn-sm text-white">
+                      <input type="hidden" name="symbol" value="{{ symbol }}" />
+                      <input type="hidden" name="indicator_type" value="all" />
+                      <button
+                        type="submit"
+                        class="btn btn-warning btn-sm text-white"
+                      >
                         <i class="fas fa-chart-bar mr-1"></i> Full Analysis
                       </button>
                     </form>
@@ -401,9 +562,10 @@
                   </div>
                   <div class="text-center mt-3">
                     <form action="/risk-analysis" method="post">
-                      <input type="hidden" name="symbol" value="{{ symbol }}">
+                      <input type="hidden" name="symbol" value="{{ symbol }}" />
                       <button type="submit" class="btn btn-danger btn-sm">
-                        <i class="fas fa-exclamation-triangle mr-1"></i> Full Analysis
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Full
+                        Analysis
                       </button>
                     </form>
                   </div>
@@ -412,27 +574,42 @@
             </div>
             <div class="col-md-4">
               <div class="card add-portfolio-card">
-                <div class="card-header bg-purple text-white" style="background-color: #6f42c1;">
+                <div
+                  class="card-header bg-purple text-white"
+                  style="background-color: #6f42c1"
+                >
                   <h4 class="mb-0">Portfolio Management</h4>
                 </div>
                 <div class="card-body">
-                  <p>Add this stock to your portfolio to track performance and manage your investments.</p>
-                  <button class="btn btn-purple btn-block" style="background-color: #6f42c1; color: white;" data-toggle="modal" data-target="#addToPortfolioModal">
+                  <p>
+                    Add this stock to your portfolio to track performance and
+                    manage your investments.
+                  </p>
+                  <button
+                    class="btn btn-purple btn-block"
+                    style="background-color: #6f42c1; color: white"
+                    data-toggle="modal"
+                    data-target="#addToPortfolioModal"
+                  >
                     <i class="fas fa-folder-plus mr-1"></i> Add to Portfolio
                   </button>
-                  <hr>
+                  <hr />
                   <p class="mb-1">Already in portfolios:</p>
                   {% if portfolios %}
-                    <ul class="list-group">
-                      {% for portfolio in portfolios %}
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ portfolio.name }}
-                        <span class="badge badge-primary badge-pill">{{ portfolio.shares }} shares</span>
-                      </li>
-                      {% endfor %}
-                    </ul>
+                  <ul class="list-group">
+                    {% for portfolio in portfolios %}
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      {{ portfolio.name }}
+                      <span class="badge badge-primary badge-pill"
+                        >{{ portfolio.shares }} shares</span
+                      >
+                    </li>
+                    {% endfor %}
+                  </ul>
                   {% else %}
-                    <p class="text-muted">Not in any portfolio yet</p>
+                  <p class="text-muted">Not in any portfolio yet</p>
                   {% endif %}
                 </div>
               </div>
@@ -443,9 +620,11 @@
         <!-- Predictions Tab -->
         <div class="tab-pane fade" id="predictions" role="tabpanel">
           <h3>Price Predictions</h3>
-          <p>This section will be populated when you run a prediction analysis.</p>
+          <p>
+            This section will be populated when you run a prediction analysis.
+          </p>
           <form action="/predict" method="post">
-            <input type="hidden" name="symbol" value="{{ symbol }}">
+            <input type="hidden" name="symbol" value="{{ symbol }}" />
             <button type="submit" class="btn btn-primary">
               <i class="fas fa-chart-line mr-1"></i> Run Prediction Analysis
             </button>
@@ -455,10 +634,12 @@
         <!-- Technical Tab -->
         <div class="tab-pane fade" id="technical" role="tabpanel">
           <h3>Technical Analysis</h3>
-          <p>This section will be populated when you run a technical analysis.</p>
+          <p>
+            This section will be populated when you run a technical analysis.
+          </p>
           <form action="/technical-indicators" method="post">
-            <input type="hidden" name="symbol" value="{{ symbol }}">
-            <input type="hidden" name="indicator_type" value="all">
+            <input type="hidden" name="symbol" value="{{ symbol }}" />
+            <input type="hidden" name="indicator_type" value="all" />
             <button type="submit" class="btn btn-success">
               <i class="fas fa-chart-bar mr-1"></i> Run Technical Analysis
             </button>
@@ -470,7 +651,7 @@
           <h3>Risk Analysis</h3>
           <p>This section will be populated when you run a risk analysis.</p>
           <form action="/risk-analysis" method="post">
-            <input type="hidden" name="symbol" value="{{ symbol }}">
+            <input type="hidden" name="symbol" value="{{ symbol }}" />
             <button type="submit" class="btn btn-danger">
               <i class="fas fa-exclamation-triangle mr-1"></i> Run Risk Analysis
             </button>
@@ -481,78 +662,213 @@
         <div class="tab-pane fade" id="news" role="tabpanel">
           <h3>Recent News</h3>
           {% if sentiment_data and sentiment_data|length > 0 %}
-            <div class="row">
-              {% for article in sentiment_data %}
-              <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                  <div class="card-header {% if article.sentiment > 0.2 %}bg-success text-white{% elif article.sentiment < -0.2 %}bg-danger text-white{% else %}bg-light{% endif %}">
-                    <h5 class="mb-0">{{ article.title }}</h5>
+          <div class="row">
+            {% for article in sentiment_data %}
+            <div class="col-md-4 mb-3">
+              <div class="card h-100">
+                <div
+                  class="card-header {% if article.sentiment > 0.2 %}bg-success text-white{% elif article.sentiment < -0.2 %}bg-danger text-white{% else %}bg-light{% endif %}"
+                >
+                  <h5 class="mb-0">{{ article.title }}</h5>
+                </div>
+                <div class="card-body">
+                  <p>{{ article.description }}</p>
+                  <p class="text-muted">Source: {{ article.source }}</p>
+                  <p class="text-muted">
+                    Published: {{ article.published_at }}
+                  </p>
+                  <p
+                    class="{% if article.sentiment > 0.2 %}text-success{% elif article.sentiment < -0.2 %}text-danger{% else %}text-secondary{% endif %}"
+                  >
+                    Sentiment: {{ "%.2f"|format(article.sentiment) }}
+                  </p>
+                </div>
+                <div class="card-footer">
+                  <a
+                    href="{{ article.url }}"
+                    target="_blank"
+                    class="btn btn-sm btn-primary"
+                    >Read More</a
+                  >
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p>No recent news articles found for {{ symbol }}.</p>
+          {% endif %}
+        </div>
+
+        <!-- Chatbot Tab -->
+        <div class="tab-pane fade" id="chatbot" role="tabpanel">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header bg-info text-white">
+                  <h4 class="mb-0">
+                    <i class="fas fa-robot mr-2"></i>AI Financial Assistant
+                  </h4>
+                </div>
+                <div class="card-body">
+                  <div
+                    class="chat-container"
+                    style="
+                      height: 400px;
+                      overflow-y: auto;
+                      border: 1px solid #e9ecef;
+                      border-radius: 5px;
+                      padding: 15px;
+                      margin-bottom: 15px;
+                    "
+                  >
+                    <div id="chat-messages">
+                      <div class="message system-message">
+                        <div class="message-content">
+                          <p>
+                            Hey there! 👋 I'm your AI assistant for {{ symbol
+                            }}. I'll help you make sense of all this data in
+                            plain English. Just click on the AI Assistant tab
+                            and I'll start analyzing...
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="card-body">
-                    <p>{{ article.description }}</p>
-                    <p class="text-muted">Source: {{ article.source }}</p>
-                    <p class="text-muted">Published: {{ article.published_at }}</p>
-                    <p class="{% if article.sentiment > 0.2 %}text-success{% elif article.sentiment < -0.2 %}text-danger{% else %}text-secondary{% endif %}">
-                      Sentiment: {{ "%.2f"|format(article.sentiment) }}
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      id="chat-input"
+                      class="form-control"
+                      placeholder="Ask about {{ symbol }}..."
+                    />
+                    <div class="input-group-append">
+                      <button
+                        class="btn btn-info"
+                        type="button"
+                        id="send-button"
+                      >
+                        <i class="fas fa-paper-plane"></i> Send
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-muted small">
+                    <p>
+                      Try asking about technical indicators, price predictions,
+                      risk assessment, or for investment advice based on the
+                      current data.
                     </p>
-                  </div>
-                  <div class="card-footer">
-                    <a href="{{ article.url }}" target="_blank" class="btn btn-sm btn-primary">Read More</a>
                   </div>
                 </div>
               </div>
-              {% endfor %}
             </div>
-          {% else %}
-            <p>No recent news articles found for {{ symbol }}.</p>
-          {% endif %}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Add to Portfolio Modal -->
-    <div class="modal fade" id="addToPortfolioModal" tabindex="-1" role="dialog" aria-labelledby="addToPortfolioModalLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="addToPortfolioModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="addToPortfolioModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="addToPortfolioModalLabel">Add {{ symbol }} to Portfolio</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <h5 class="modal-title" id="addToPortfolioModalLabel">
+              Add {{ symbol }} to Portfolio
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
-            <form id="addToPortfolioForm" action="/portfolio/add-holding" method="post">
-              <input type="hidden" name="symbol" value="{{ symbol }}">
-              
+            <form
+              id="addToPortfolioForm"
+              action="/portfolio/add-holding"
+              method="post"
+            >
+              <input type="hidden" name="symbol" value="{{ symbol }}" />
+
               <div class="form-group">
                 <label for="portfolioSelect">Select Portfolio</label>
-                <select class="form-control" id="portfolioSelect" name="portfolio_id" required>
+                <select
+                  class="form-control"
+                  id="portfolioSelect"
+                  name="portfolio_id"
+                  required
+                >
                   <option value="">-- Select a Portfolio --</option>
                   {% for portfolio in all_portfolios %}
-                  <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
+                  <option value="{{ portfolio.id }}">
+                    {{ portfolio.name }}
+                  </option>
                   {% endfor %}
                 </select>
               </div>
-              
+
               <div class="form-group">
                 <label for="quantity">Number of Shares</label>
-                <input type="number" class="form-control" id="quantity" name="quantity" min="0.01" step="0.01" required>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="quantity"
+                  name="quantity"
+                  min="0.01"
+                  step="0.01"
+                  required
+                />
               </div>
-              
+
               <div class="form-group">
                 <label for="purchase_price">Purchase Price per Share ($)</label>
-                <input type="number" class="form-control" id="purchase_price" name="purchase_price" min="0.01" step="0.01" value="{{ latest_price }}" required>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="purchase_price"
+                  name="purchase_price"
+                  min="0.01"
+                  step="0.01"
+                  value="{{ latest_price }}"
+                  required
+                />
               </div>
-              
+
               <div class="form-group">
                 <label for="purchase_date">Purchase Date</label>
-                <input type="date" class="form-control" id="purchase_date" name="purchase_date">
+                <input
+                  type="date"
+                  class="form-control"
+                  id="purchase_date"
+                  name="purchase_date"
+                />
               </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" form="addToPortfolioForm" class="btn btn-primary">Add to Portfolio</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="addToPortfolioForm"
+              class="btn btn-primary"
+            >
+              Add to Portfolio
+            </button>
           </div>
         </div>
       </div>
@@ -564,7 +880,10 @@
         <div class="row">
           <div class="col-md-4">
             <h5><i class="fas fa-chart-line mr-2"></i>StockSense</h5>
-            <p>Advanced stock analysis and prediction platform powered by AI and machine learning.</p>
+            <p>
+              Advanced stock analysis and prediction platform powered by AI and
+              machine learning.
+            </p>
           </div>
           <div class="col-md-4">
             <h5>Quick Links</h5>
@@ -591,5 +910,260 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Chatbot Script -->
+    <script>
+      $(document).ready(function () {
+        // Stock data to send to the chatbot
+        const stockData = {
+          symbol: "{{ symbol }}",
+          company_name: "{{ company_name }}",
+          latest_price: "{{ latest_price }}",
+          price_change_amount: "{{ price_change_amount }}",
+          price_change_percent: "{{ price_change_percent }}",
+          open_price: "{{ open_price }}",
+          high_price: "{{ high_price }}",
+          low_price: "{{ low_price }}",
+          volume: "{{ volume }}",
+          year_high: "{{ year_high }}",
+          year_low: "{{ year_low }}",
+          arima_pred: "{{ arima_pred }}",
+          lstm_pred: "{{ lstm_pred }}",
+          lr_pred: "{{ lr_pred }}",
+          ensemble_pred: "{{ ensemble_pred }}",
+          prediction_accuracy: "{{ prediction_accuracy }}",
+          rsi_value: "{{ rsi_value }}",
+          macd_value: "{{ macd_value }}",
+          sma_50: "{{ sma_50 }}",
+          sma_200: "{{ sma_200 }}",
+          volatility: "{{ volatility }}",
+          var_value: "{{ var_value }}",
+          beta: "{{ beta }}",
+          sharpe_ratio: "{{ sharpe_ratio }}",
+          sentiment_description: "{{ sentiment_description }}",
+          sentiment_score: "{{ sentiment_score }}",
+          sentiment_articles_count: "{{ sentiment_articles_count }}",
+        };
+
+        // Function to add a message to the chat
+        function addMessage(message, sender) {
+          const time = new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          let messageHtml = "";
+
+          if (sender === "user") {
+            messageHtml = `
+              <div class="message user-message">
+                <div class="message-content">
+                  <p>${message}</p>
+                </div>
+                <div class="message-time">${time}</div>
+              </div>
+            `;
+          } else if (sender === "bot") {
+            messageHtml = `
+              <div class="message bot-message" id="latest-bot-message">
+                <div class="message-content">
+                  <p>${message}</p>
+                </div>
+                <div class="message-time">${time}</div>
+              </div>
+            `;
+          } else if (sender === "system") {
+            messageHtml = `
+              <div class="message system-message">
+                <div class="message-content">
+                  <p>${message}</p>
+                </div>
+              </div>
+            `;
+          }
+
+          $("#chat-messages").append(messageHtml);
+
+          // Scroll to bottom
+          const chatContainer = $(".chat-container");
+          chatContainer.scrollTop(chatContainer[0].scrollHeight);
+
+          // Remove the ID from the previous latest message
+          setTimeout(() => {
+            $("#latest-bot-message").removeAttr("id");
+          }, 100);
+        }
+
+        // Function to type out a message character by character
+        function typeMessage(message, sender) {
+          const time = new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          // Create a unique ID for this message
+          const messageId = "typing-message-" + Date.now();
+
+          // Create the message container first
+          let messageHtml = "";
+          if (sender === "bot") {
+            messageHtml = `
+              <div class="message bot-message" id="${messageId}">
+                <div class="message-content">
+                  <p id="typing-text-${messageId}"></p>
+                </div>
+                <div class="message-time">${time}</div>
+              </div>
+            `;
+          }
+
+          $("#chat-messages").append(messageHtml);
+
+          // Clean up the message - replace markdown-style formatting
+          message = message
+            .replace(/\*\*\*/g, "")
+            .replace(/\*\*/g, "")
+            .replace(/---/g, "");
+
+          // Split the message into sentences or bullet points for more natural typing
+          let segments = [];
+
+          // Check if the message contains bullet points
+          if (
+            message.includes("•") ||
+            message.includes("-") ||
+            message.includes("*")
+          ) {
+            // Split by common bullet point markers and newlines
+            segments = message.split(/(?=[•\-\*])|(?=\n)/g);
+          } else {
+            // Split by sentences
+            segments = message.split(/(?<=[.!?])\s+/g);
+          }
+
+          // Filter out empty segments
+          segments = segments.filter((segment) => segment.trim().length > 0);
+
+          let currentText = "";
+          let segmentIndex = 0;
+
+          // Function to type the next segment
+          function typeNextSegment() {
+            if (segmentIndex < segments.length) {
+              const segment = segments[segmentIndex];
+              currentText += segment + " ";
+
+              // Format the text with proper HTML
+              let formattedText = currentText
+                .replace(/\n/g, "<br>")
+                .replace(/•/g, "<br>•")
+                .replace(/\*/g, "")
+                .replace(/\*\*/g, "");
+
+              $(`#typing-text-${messageId}`).html(formattedText);
+
+              // Scroll to bottom as text is being typed
+              const chatContainer = $(".chat-container");
+              chatContainer.scrollTop(chatContainer[0].scrollHeight);
+
+              segmentIndex++;
+
+              // Add a variable delay between segments based on length
+              const delay = Math.min(segment.length * 15, 400);
+              setTimeout(typeNextSegment, delay);
+            }
+          }
+
+          // Start typing
+          typeNextSegment();
+        }
+
+        // Function to show typing indicator
+        function showTypingIndicator() {
+          const typingHtml = `
+            <div class="typing-indicator" id="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          `;
+          $("#chat-messages").append(typingHtml);
+
+          // Scroll to bottom
+          const chatContainer = $(".chat-container");
+          chatContainer.scrollTop(chatContainer[0].scrollHeight);
+        }
+
+        // Function to hide typing indicator
+        function hideTypingIndicator() {
+          $("#typing-indicator").remove();
+        }
+
+        // Function to send message to chatbot API
+        function sendToChatbot(message) {
+          showTypingIndicator();
+
+          $.ajax({
+            url: "/chatbot",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+              message: message,
+              symbol: "{{ symbol }}",
+              stock_data: stockData,
+            }),
+            success: function (response) {
+              hideTypingIndicator();
+              if (response && response.response) {
+                // Use dynamic typing effect instead of showing all at once
+                typeMessage(response.response, "bot");
+              } else {
+                addMessage(
+                  "I received an empty response. Please try again.",
+                  "bot"
+                );
+              }
+            },
+            error: function (xhr, status, error) {
+              hideTypingIndicator();
+              console.error("Chatbot error:", status, error);
+              addMessage(
+                "I'm sorry, I encountered an error connecting to the server. Please try again later.",
+                "bot"
+              );
+            },
+          });
+        }
+
+        // Handle send button click
+        $("#send-button").click(function () {
+          const message = $("#chat-input").val().trim();
+          if (message) {
+            addMessage(message, "user");
+            $("#chat-input").val("");
+            sendToChatbot(message);
+          }
+        });
+
+        // Handle enter key press
+        $("#chat-input").keypress(function (e) {
+          if (e.which === 13) {
+            // Enter key
+            $("#send-button").click();
+            return false;
+          }
+        });
+
+        // When the chatbot tab is shown, get initial insights
+        $("#chatbot-tab").on("shown.bs.tab", function () {
+          // Only get initial insights if there are no messages yet (except the welcome message)
+          if ($("#chat-messages .message").length <= 1) {
+            // Add a small delay before sending the initial request to make it feel more natural
+            setTimeout(() => {
+              sendToChatbot("initial");
+            }, 800);
+          }
+        });
+      });
+    </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, Cookie, Depends
+from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -34,7 +34,9 @@ from technical_indicators_ta import TechnicalIndicators
 from portfolio_management import PortfolioManager
 from risk_analysis import RiskAnalyzer
 from enhanced_visualization import EnhancedVisualization
-from user_management import UserManager
+# User management removed
+# from user_management import UserManager
+from chatbot_service import ChatbotService
 
 # Initialize all services
 db = StockDatabase()
@@ -45,7 +47,9 @@ portfolio_manager = PortfolioManager(db_path="stock_data.db")
 risk_analyzer = RiskAnalyzer()
 technical_indicator = TechnicalIndicators()
 enhanced_viz = EnhancedVisualization()
-user_manager = UserManager()
+# User manager removed
+# user_manager = UserManager()
+chatbot_service = ChatbotService()
 
 # Delete existing database file if you want to start fresh (optional)
 # if os.path.exists("stock_data.db"):
@@ -728,56 +732,7 @@ async def stock_detail(request: Request, symbol: str):
 async def education(request: Request):
     return templates.TemplateResponse("education.html", {"request": request})
 
-@app.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request, message: str = None, error: str = None):
-    return templates.TemplateResponse("login.html", {"request": request, "message": message, "error": error})
-
-@app.post("/login", response_class=HTMLResponse)
-async def login(request: Request, email: str = Form(...), password: str = Form(...), remember: bool = Form(default=False)):
-    success, user_data, message = user_manager.authenticate_user(email, password)
-
-    if success:
-        # Create session
-        session_id = user_manager.create_session(user_data["user_id"], expires_days=30 if remember else 1)
-
-        # Create response with redirect
-        response = RedirectResponse(url="/", status_code=303)
-
-        # Set session cookie
-        response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=2592000 if remember else 86400)
-
-        return response
-    else:
-        return templates.TemplateResponse("login.html", {"request": request, "error": message})
-
-@app.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request, error: str = None):
-    return templates.TemplateResponse("register.html", {"request": request, "error": error})
-
-@app.post("/register", response_class=HTMLResponse)
-async def register(request: Request, email: str = Form(...), password: str = Form(...), confirm_password: str = Form(...), first_name: str = Form(...), last_name: str = Form(...)):
-    # Validate password match
-    if password != confirm_password:
-        return templates.TemplateResponse("register.html", {"request": request, "error": "Passwords do not match"})
-
-    # Register user
-    success, message = user_manager.register_user(email, password, first_name, last_name)
-
-    if success:
-        # Redirect to login page with success message
-        return RedirectResponse(url=f"/login?message={message}", status_code=303)
-    else:
-        return templates.TemplateResponse("register.html", {"request": request, "error": message})
-
-@app.get("/logout")
-async def logout(request: Request, session_id: str = Cookie(None)):
-    if session_id:
-        user_manager.end_session(session_id)
-
-    response = RedirectResponse(url="/", status_code=303)
-    response.delete_cookie(key="session_id")
-
-    return response
+# Login, register, and logout routes have been removed
 
 @app.post("/predict", response_class=HTMLResponse)
 async def predict(request: Request, symbol: str = Form(...)):
@@ -1496,6 +1451,27 @@ async def get_risk_analysis(request: Request, symbol: str = Form(...)):
             "error.html",
             {"request": request, "error_message": f"Error calculating risk analysis: {str(e)}"}
         )
+
+@app.post("/chatbot")
+async def get_chatbot_response(request: Request):
+    """Get a response from the chatbot"""
+    try:
+        # Parse the request body
+        data = await request.json()
+        message = data.get('message', '')
+        symbol = data.get('symbol', '')
+        stock_data = data.get('stock_data', {})
+
+        # Get response from chatbot service
+        if message.lower() == 'initial':
+            response = chatbot_service.generate_initial_insights(stock_data)
+        else:
+            response = chatbot_service.get_response(message, stock_data)
+
+        return {"response": response}
+    except Exception as e:
+        print(f"Error getting chatbot response: {str(e)}")
+        return {"response": "I'm sorry, I encountered an error. Please try again."}
 
 if __name__ == "__main__":
     import uvicorn
