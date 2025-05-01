@@ -7,25 +7,39 @@ A FastAPI-based web application that predicts stock market prices using machine 
 - Price predictions using multiple algorithms
 - 7-day price forecasting
 - Simple and intuitive interface
+- Sentiment analysis of financial news
 
 ## Installation
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/stock-prediction-app.git
-cd stock-prediction-app
+git clone https://github.com/Mihirpatel6996/FinTech.git
+cd FinTech
 ```
 
-2. Install dependencies:
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Run the application:
+4. Set up environment variables (if needed):
+```bash
+# For sentiment analysis
+export NEWS_API_KEY="your_api_key_here"
+# On Windows: set NEWS_API_KEY=your_api_key_here
+```
+
+5. Run the application:
 ```bash
 uvicorn main:app --reload
 ```
 
-4. Open http://localhost:8000 in your browser
+6. Open http://localhost:8000 in your browser
 
 ## Usage
 1. Enter a valid stock symbol (e.g., AAPL, GOOGL)
@@ -42,3 +56,4 @@ uvicorn main:app --reload
 
 ## License
 MIT License - see LICENSE file for details
+
