@@ -46,9 +46,8 @@ class SentimentAnalysisService:
                 import os
                 from dotenv import load_dotenv
 
-                # Load .env file from the sentiment_analysis directory
-                dotenv_path = os.path.join('sentiment_analysis', '.env')
-                load_dotenv(dotenv_path)
+                # Load .env file
+                load_dotenv()
 
                 # Get API key
                 api_key = os.getenv('NEWS_API_KEY')
@@ -57,7 +56,7 @@ class SentimentAnalysisService:
 
                 # Initialize sentiment service with API key
                 self.sentiment_service = SentimentService(news_api_key=api_key)
-                print(f"Using real NewsAPI service with key: {api_key[:5]}...")
+                print(f"Using real NewsAPI service with key: {api_key[:5]}..." if api_key else "Using default API key")
             except Exception as e:
                 print(f"Error initializing real news service: {str(e)}. Falling back to mock service.")
                 # Fall back to mock service if there's an error
@@ -255,3 +254,4 @@ class SentimentAnalysisService:
 
         total_sentiment = sum(item.get('sentiment', 0) for item in sentiment_data)
         return total_sentiment / len(sentiment_data)
+

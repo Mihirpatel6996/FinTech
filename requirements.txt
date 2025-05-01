@@ -13,3 +13,4 @@ yfinance
 alpha_vantage>=2.3.1
 tensorflow
 keras
+python-dotenv>=1.0.0

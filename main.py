@@ -20,8 +20,9 @@ import warnings
 import time
 import json
 import sqlite3
-warnings.filterwarnings("ignore")
 import os
+from dotenv import load_dotenv
+warnings.filterwarnings("ignore")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from database import StockDatabase
 import asyncio
@@ -34,9 +35,10 @@ from technical_indicators_ta import TechnicalIndicators
 from portfolio_management import PortfolioManager
 from risk_analysis import RiskAnalyzer
 from enhanced_visualization import EnhancedVisualization
-# User management removed
-# from user_management import UserManager
 from chatbot_service import ChatbotService
+
+# Load environment variables
+load_dotenv()
 
 # Initialize all services
 db = StockDatabase()
@@ -47,8 +49,6 @@ portfolio_manager = PortfolioManager(db_path="stock_data.db")
 risk_analyzer = RiskAnalyzer()
 technical_indicator = TechnicalIndicators()
 enhanced_viz = EnhancedVisualization()
-# User manager removed
-# user_manager = UserManager()
 chatbot_service = ChatbotService()
 
 # Delete existing database file if you want to start fresh (optional)

@@ -57,3 +57,24 @@ uvicorn main:app --reload
 ## License
 MIT License - see LICENSE file for details
 
+## Environment Setup
+
+1. Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+2. Edit the `.env` file and add your API keys:
+```
+# Google Gemini API Key
+GEMINI_API_KEY=your_gemini_api_key
+
+# NewsAPI Key
+NEWS_API_KEY=your_news_api_key
+```
+
+These API keys are required for:
+- Google Gemini API: Powering the AI chatbot
+- NewsAPI: Fetching financial news for sentiment analysis
+
+

@@ -6,6 +6,10 @@ This module provides configuration settings for the sentiment analysis module.
 
 import os
 from typing import List, Tuple
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class Settings:
     """
@@ -13,7 +17,7 @@ class Settings:
     """
 
     # NewsAPI settings
-    NEWS_API_KEY: str = os.environ.get("NEWS_API_KEY", "2939063f6d8a4948aae8dfe4f9378d90")
+    NEWS_API_KEY: str = os.getenv("NEWS_API_KEY")
 
     # NLTK settings
     NLTK_TOKENS_REQUIRED: Tuple[str, ...] = ()
@@ -21,3 +25,4 @@ class Settings:
     NLTK_TOKENS_IGNORED: Tuple[str, ...] = ("win", "giveaway")
 
 settings = Settings()
+

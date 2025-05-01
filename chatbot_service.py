@@ -5,23 +5,28 @@ This module provides functionality for an AI-powered chatbot that can provide
 insights and answer questions about stocks using Google's Gemini API.
 """
 
+import os
+from dotenv import load_dotenv
 import google.generativeai as genai
 import json
 from typing import Dict, List, Any, Optional
+
+# Load environment variables
+load_dotenv()
 
 class ChatbotService:
     """
     Class for managing AI chatbot interactions.
     """
 
-    def __init__(self, api_key: str = "AIzaSyAR-PgnMjfG3TDRt9JXLhsPAtvt8_FoHvw"):
+    def __init__(self, api_key: str = None):
         """
         Initialize the chatbot service.
 
         Args:
             api_key: Google Gemini API key
         """
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv('GEMINI_API_KEY')
         self._initialize_model()
 
     def _initialize_model(self):
@@ -223,3 +228,4 @@ class ChatbotService:
         """
 
         return prompt
+
